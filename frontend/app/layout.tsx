@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { WalletProvider } from "@/components/WalletProvider";
+import { ToastProvider } from "@/components/Toast";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
@@ -23,12 +24,15 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <WalletProvider>
-          <Navbar />
-          <main>
-            {children}
-          </main>
+          <ToastProvider>
+            <Navbar />
+            <main>
+              {children}
+            </main>
+          </ToastProvider>
         </WalletProvider>
       </body>
     </html>
   );
 }
+

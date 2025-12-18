@@ -5,6 +5,7 @@ import Link from 'next/link';
 import TokenCard from '@/components/TokenCard';
 import KingOfTheHill from '@/components/KingOfTheHill';
 import RecentTrades from '@/components/RecentTrades';
+import AdvancedSearch from '@/components/AdvancedSearch';
 import { Token, getTokens, getTrendingTokens, Activity, getActivity } from '@/lib/api';
 import { formatAddress, getExplorerTxUrl } from '@/lib/stacks';
 
@@ -105,14 +106,14 @@ export default function Home() {
         <div className="pump-panel mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex gap-2 p-1 bg-black rounded-lg border border-[var(--border)]">
             {[
-              { id: 'trending', label: 'trending' },
-              { id: 'new', label: 'new' },
-              { id: 'graduated', label: 'graduated' },
+              { id: 'trending', label: '🔥 trending' },
+              { id: 'new', label: '✨ new' },
+              { id: 'graduated', label: '🎓 graduated' },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as FilterTab)}
-                className={`px-4 py-1 rounded font-bold text-xs uppercase tracking-tight transition-all ${activeTab === tab.id
+                className={`px-4 py-2 rounded font-bold text-xs uppercase tracking-tight transition-all ${activeTab === tab.id
                   ? 'bg-white text-black'
                   : 'text-[var(--text-muted)] hover:text-white'
                   }`}
@@ -122,14 +123,9 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="relative w-full md:w-64">
-            <input
-              type="text"
-              placeholder="search for token..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pump-input text-xs"
-            />
+          {/* Advanced Search */}
+          <div className="w-full md:w-96">
+            <AdvancedSearch />
           </div>
         </div>
 

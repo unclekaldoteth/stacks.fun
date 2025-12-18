@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import NFTGallery from '@/components/NFTGallery';
 import TransactionHistory from '@/components/TransactionHistory';
+import Portfolio from '@/components/Portfolio';
 import { useWallet } from '@/components/WalletProvider';
 import { getSTXBalance, getAccountNFTs } from '@/lib/hiro';
 import { formatAddress, getExplorerAddressUrl } from '@/lib/stacks';
@@ -12,7 +13,7 @@ export default function ProfilePage() {
     const { isConnected, address, connect } = useWallet();
     const [balance, setBalance] = useState<string | null>(null);
     const [nftCount, setNftCount] = useState<number>(0);
-    const [activeTab, setActiveTab] = useState<'nfts' | 'transactions'>('nfts');
+    const [activeTab, setActiveTab] = useState<'holdings' | 'nfts' | 'transactions'>('holdings');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -44,7 +45,7 @@ export default function ProfilePage() {
                         </div>
                         <h1 className="text-3xl font-bold mb-4">Connect Your Wallet</h1>
                         <p className="text-zinc-400 mb-8 max-w-md mx-auto">
-                            Connect your Stacks wallet to view your profile, NFT collection, and transaction history.
+                            Connect your Stacks wallet to view your profile, token holdings, NFT collection, and transaction history.
                         </p>
                         <button
                             onClick={connect}
@@ -103,28 +104,39 @@ export default function ProfilePage() {
                 {/* Tabs */}
                 <div className="flex gap-2 mb-6">
                     <button
-                        onClick={() => setActiveTab('nfts')}
-                        className={`px-6 py-3 rounded-full font-medium transition-all ${activeTab === 'nfts'
-                                ? 'bg-white text-black'
-                                : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                        onClick={() => setActiveTab('holdings')}
+                        className={`px-6 py-3 rounded-full font-medium transition-all ${activeTab === 'holdings'
+                            ? 'bg-[var(--accent-orange)] text-black'
+                            : 'bg-zinc-800 text-white hover:bg-zinc-700'
                             }`}
                     >
-                        My NFTs
+                        💰 Holdings
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('nfts')}
+                        className={`px-6 py-3 rounded-full font-medium transition-all ${activeTab === 'nfts'
+                            ? 'bg-white text-black'
+                            : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                            }`}
+                    >
+                        🖼️ NFTs
                     </button>
                     <button
                         onClick={() => setActiveTab('transactions')}
                         className={`px-6 py-3 rounded-full font-medium transition-all ${activeTab === 'transactions'
-                                ? 'bg-white text-black'
-                                : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                            ? 'bg-white text-black'
+                            : 'bg-zinc-800 text-white hover:bg-zinc-700'
                             }`}
                     >
-                        Transactions
+                        📜 Transactions
                     </button>
                 </div>
 
                 {/* Content */}
                 <div className="bg-zinc-900/30 rounded-2xl p-6 border border-white/5">
-                    {activeTab === 'nfts' ? (
+                    {activeTab === 'holdings' ? (
+                        <Portfolio showHeader={false} />
+                    ) : activeTab === 'nfts' ? (
                         <NFTGallery showHeader={false} />
                     ) : (
                         <TransactionHistory showHeader={false} />
@@ -134,3 +146,4 @@ export default function ProfilePage() {
         </main>
     );
 }
+
