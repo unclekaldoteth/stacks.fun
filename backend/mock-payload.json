@@ -2,21 +2,47 @@
   "apply": [
     {
       "block_identifier": {
-        "index": 100,
-        "hash": "0x1234567890abcdef"
+        "index": 12345,
+        "hash": "0xabc123def456789example"
       },
-      "timestamp": 1678900000,
+      "timestamp": 1703001600,
       "transactions": [
         {
           "transaction_identifier": {
-            "hash": "0xabcdef1234567890"
+            "hash": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
           },
           "status": "success",
           "metadata": {
-             "sender": "ST1234..."
+            "sender": "ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM",
+            "kind": {
+              "ContractCall": {
+                "contract_identifier": "ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM.launchpad-factory",
+                "function_name": "register-token"
+              }
+            },
+            "receipt": {
+              "events": [
+                {
+                  "type": "SmartContractEvent",
+                  "data": {
+                    "contract_identifier": "ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM.launchpad-factory",
+                    "topic": "print",
+                    "value": {
+                      "event": "token-created",
+                      "name": "Test Token",
+                      "symbol": "TEST",
+                      "creator": "ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM",
+                      "bonding_curve": "ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM.bonding-curve",
+                      "initial_supply": 1000000000000000
+                    }
+                  }
+                }
+              ]
+            }
           }
         }
       ]
     }
-  ]
+  ],
+  "rollback": []
 }

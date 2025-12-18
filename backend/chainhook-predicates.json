@@ -1,83 +1,136 @@
 {
-    "uuid": "stacks-launchpad-chainhooks",
-    "name": "Stacks Token Launchpad Events",
+    "uuid": "stacks-fun-launchpad",
+    "name": "Stacks.fun Token Launchpad Events",
     "version": 1,
     "chain": "stacks",
     "networks": {
+        "testnet": {
+            "predicates": [
+                {
+                    "name": "token-created",
+                    "description": "Triggered when a new token is registered on the launchpad",
+                    "if_this": {
+                        "scope": "contract_call",
+                        "contract_identifier": "ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM.launchpad-factory",
+                        "method": "register-token"
+                    },
+                    "then_that": {
+                        "http_post": {
+                            "url": "${WEBHOOK_URL}/api/chainhook",
+                            "authorization_header": "Bearer ${CHAINHOOK_SECRET}"
+                        }
+                    }
+                },
+                {
+                    "name": "token-buy",
+                    "description": "Triggered when tokens are purchased on the bonding curve",
+                    "if_this": {
+                        "scope": "contract_call",
+                        "contract_identifier": "ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM.bonding-curve",
+                        "method": "buy"
+                    },
+                    "then_that": {
+                        "http_post": {
+                            "url": "${WEBHOOK_URL}/api/chainhook",
+                            "authorization_header": "Bearer ${CHAINHOOK_SECRET}"
+                        }
+                    }
+                },
+                {
+                    "name": "token-sell",
+                    "description": "Triggered when tokens are sold on the bonding curve",
+                    "if_this": {
+                        "scope": "contract_call",
+                        "contract_identifier": "ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM.bonding-curve",
+                        "method": "sell"
+                    },
+                    "then_that": {
+                        "http_post": {
+                            "url": "${WEBHOOK_URL}/api/chainhook",
+                            "authorization_header": "Bearer ${CHAINHOOK_SECRET}"
+                        }
+                    }
+                },
+                {
+                    "name": "token-graduated",
+                    "description": "Triggered when a token graduates to ALEX DEX",
+                    "if_this": {
+                        "scope": "contract_call",
+                        "contract_identifier": "ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM.alex-graduation",
+                        "method": "graduate-token"
+                    },
+                    "then_that": {
+                        "http_post": {
+                            "url": "${WEBHOOK_URL}/api/chainhook",
+                            "authorization_header": "Bearer ${CHAINHOOK_SECRET}"
+                        }
+                    }
+                }
+            ]
+        },
         "mainnet": {
-            "if_this": {
-                "scope": "contract_call",
-                "contract_identifier": "SP_DEPLOYER.launchpad-factory",
-                "method": "register-token"
-            },
-            "then_that": {
-                "http_post": {
-                    "url": "https://your-backend.com/api/chainhook",
-                    "authorization_header": "Bearer YOUR_CHAINHOOK_SECRET"
+            "predicates": [
+                {
+                    "name": "token-created",
+                    "description": "Triggered when a new token is registered on the launchpad",
+                    "if_this": {
+                        "scope": "contract_call",
+                        "contract_identifier": "${MAINNET_DEPLOYER}.launchpad-factory",
+                        "method": "register-token"
+                    },
+                    "then_that": {
+                        "http_post": {
+                            "url": "${WEBHOOK_URL}/api/chainhook",
+                            "authorization_header": "Bearer ${CHAINHOOK_SECRET}"
+                        }
+                    }
+                },
+                {
+                    "name": "token-buy",
+                    "description": "Triggered when tokens are purchased on the bonding curve",
+                    "if_this": {
+                        "scope": "contract_call",
+                        "contract_identifier": "${MAINNET_DEPLOYER}.bonding-curve",
+                        "method": "buy"
+                    },
+                    "then_that": {
+                        "http_post": {
+                            "url": "${WEBHOOK_URL}/api/chainhook",
+                            "authorization_header": "Bearer ${CHAINHOOK_SECRET}"
+                        }
+                    }
+                },
+                {
+                    "name": "token-sell",
+                    "description": "Triggered when tokens are sold on the bonding curve",
+                    "if_this": {
+                        "scope": "contract_call",
+                        "contract_identifier": "${MAINNET_DEPLOYER}.bonding-curve",
+                        "method": "sell"
+                    },
+                    "then_that": {
+                        "http_post": {
+                            "url": "${WEBHOOK_URL}/api/chainhook",
+                            "authorization_header": "Bearer ${CHAINHOOK_SECRET}"
+                        }
+                    }
+                },
+                {
+                    "name": "token-graduated",
+                    "description": "Triggered when a token graduates to ALEX DEX",
+                    "if_this": {
+                        "scope": "contract_call",
+                        "contract_identifier": "${MAINNET_DEPLOYER}.alex-graduation",
+                        "method": "graduate-token"
+                    },
+                    "then_that": {
+                        "http_post": {
+                            "url": "${WEBHOOK_URL}/api/chainhook",
+                            "authorization_header": "Bearer ${CHAINHOOK_SECRET}"
+                        }
+                    }
                 }
-            }
+            ]
         }
-    },
-    "predicates": [
-        {
-            "name": "token-created",
-            "description": "Triggered when a new token is registered on the launchpad",
-            "if_this": {
-                "scope": "contract_call",
-                "contract_identifier": "SP_DEPLOYER.launchpad-factory",
-                "method": "register-token"
-            },
-            "then_that": {
-                "http_post": {
-                    "url": "http://localhost:3001/api/chainhook",
-                    "authorization_header": ""
-                }
-            }
-        },
-        {
-            "name": "token-buy",
-            "description": "Triggered when tokens are purchased on the bonding curve",
-            "if_this": {
-                "scope": "contract_call",
-                "contract_identifier": "SP_DEPLOYER.bonding-curve",
-                "method": "buy"
-            },
-            "then_that": {
-                "http_post": {
-                    "url": "http://localhost:3001/api/chainhook",
-                    "authorization_header": ""
-                }
-            }
-        },
-        {
-            "name": "token-sell",
-            "description": "Triggered when tokens are sold on the bonding curve",
-            "if_this": {
-                "scope": "contract_call",
-                "contract_identifier": "SP_DEPLOYER.bonding-curve",
-                "method": "sell"
-            },
-            "then_that": {
-                "http_post": {
-                    "url": "http://localhost:3001/api/chainhook",
-                    "authorization_header": ""
-                }
-            }
-        },
-        {
-            "name": "token-graduated",
-            "description": "Triggered when a token graduates to ALEX DEX",
-            "if_this": {
-                "scope": "contract_call",
-                "contract_identifier": "SP_DEPLOYER.alex-graduation",
-                "method": "graduate-token"
-            },
-            "then_that": {
-                "http_post": {
-                    "url": "http://localhost:3001/api/chainhook",
-                    "authorization_header": ""
-                }
-            }
-        }
-    ]
+    }
 }
