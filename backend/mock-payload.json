@@ -1,0 +1,22 @@
+{
+  "apply": [
+    {
+      "block_identifier": {
+        "index": 100,
+        "hash": "0x1234567890abcdef"
+      },
+      "timestamp": 1678900000,
+      "transactions": [
+        {
+          "transaction_identifier": {
+            "hash": "0xabcdef1234567890"
+          },
+          "status": "success",
+          "metadata": {
+             "sender": "ST1234..."
+          }
+        }
+      ]
+    }
+  ]
+}

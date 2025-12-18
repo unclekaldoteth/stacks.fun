@@ -1,0 +1,46 @@
+---
+id: 0
+name: Testnet deployment
+network: testnet
+stacks-node: "https://api.testnet.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: alex-graduation
+            expected-sender: ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM
+            cost: 44240
+            path: contracts/alex-graduation.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: sip-010-trait
+            expected-sender: ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM
+            cost: 7840
+            path: contracts/sip-010-trait.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: bonding-curve
+            expected-sender: ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM
+            cost: 101640
+            path: contracts/bonding-curve.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: launchpad-factory
+            expected-sender: ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM
+            cost: 36560
+            path: contracts/launchpad-factory.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: launchpad-token
+            expected-sender: ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM
+            cost: 33380
+            path: contracts/launchpad-token.clar
+            anchor-block-only: true
+            clarity-version: 3
+      epoch: "3.0"

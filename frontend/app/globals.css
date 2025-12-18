@@ -1,0 +1,296 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+    --color-bg-primary: #0a0a0a;
+    --color-bg-secondary: #141414;
+    --color-bg-card: #1a1a1a;
+    --color-bg-hover: #262626;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #94a3b8;
+    --color-text-muted: #64748b;
+    --color-accent-orange: #f7931a;
+    --color-accent-red: #ef4444;
+    --color-accent-yellow: #eab308;
+    --color-border: #262626;
+    --color-border-bright: #404040;
+}
+
+:root {
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #141414;
+    --bg-card: #1a1a1a;
+    --bg-hover: #262626;
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-orange: #f7931a;
+    --accent-red: #ef4444;
+    --accent-yellow: #eab308;
+    --border: #262626;
+    --border-bright: #404040;
+}
+
+* {
+    box-sizing: border-box;
+    cursor: default;
+}
+
+a,
+button,
+input,
+[role="button"] {
+    cursor: pointer;
+}
+
+html {
+    scroll-behavior: smooth;
+    background-color: var(--bg-primary);
+}
+
+body {
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Base Terminal Style */
+.terminal-text {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Pump Buttons */
+.btn-pump {
+    padding: 0.5rem 1rem;
+    font-weight: 700;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    border-width: 2px;
+}
+
+.btn-pump:active {
+    transform: translateY(2px);
+}
+
+.btn-pump-primary {
+    background-color: white;
+    color: black;
+    border-color: white;
+}
+
+.btn-pump-primary:hover {
+    background-color: #e5e7eb;
+}
+
+.btn-pump-orange {
+    background-color: transparent;
+    color: var(--accent-orange);
+    border-color: var(--accent-orange);
+}
+
+.btn-pump-orange:hover {
+    background-color: var(--accent-orange);
+    color: black;
+}
+
+.btn-pump-red {
+    background-color: transparent;
+    color: var(--accent-red);
+    border-color: var(--accent-red);
+}
+
+.btn-pump-red:hover {
+    background-color: var(--accent-red);
+    color: black;
+}
+
+/* Pump Components */
+.pump-card {
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--border);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.pump-card:hover {
+    border-color: var(--border-bright);
+}
+
+.pump-panel {
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1rem;
+}
+
+.pump-input {
+    width: 100%;
+    background-color: black;
+    border: 2px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: white;
+    transition: border-color 0.2s;
+}
+
+.pump-input:focus {
+    outline: none;
+    border-color: white;
+}
+
+.pump-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+/* King of the Hill */
+.koth-section {
+    position: relative;
+    padding: 2rem 1.5rem;
+    background-color: rgba(234, 179, 8, 0.05);
+    border: 2px solid rgba(234, 179, 8, 0.2);
+    border-radius: 1rem;
+    margin-bottom: 3rem;
+    overflow: hidden;
+}
+
+.koth-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: var(--accent-yellow);
+    color: black;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    box-shadow: 0 0 15px rgba(234, 179, 8, 0.4);
+}
+
+/* Animations */
+@keyframes scanline {
+    0% {
+        transform: translateY(-100%);
+    }
+
+    100% {
+        transform: translateY(100%);
+    }
+}
+
+.scanline::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.03) 50%, transparent 100%);
+    animation: scanline 4s linear infinite;
+    pointer-events: none;
+}
+
+/* Stats Row */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.stat-item {
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--border);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    text-align: center;
+}
+
+.stat-val {
+    font-size: 1.25rem;
+    font-weight: 900;
+}
+
+/* Grid Layouts */
+.token-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .token-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .token-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1280px) {
+    .token-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+/* Responsive Container */
+.main-container {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+    .main-container {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .main-container {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Tooltip & Recharts Customization */
+.recharts-default-tooltip {
+    background-color: var(--bg-card) !important;
+    border: 2px solid var(--border-bright) !important;
+    border-radius: 8px !important;
+    color: white !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 12px !important;
+}
+
+.recharts-tooltip-label {
+    color: var(--text-muted) !important;
+    margin-bottom: 4px !important;
+}

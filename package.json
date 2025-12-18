@@ -1,0 +1,17 @@
+{
+    "name": "stacks-launchpad-contracts",
+    "version": "1.0.0",
+    "description": "Stacks Token Launchpad Smart Contracts",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "check": "clarinet check"
+    },
+    "devDependencies": {
+        "@stacks/clarinet-sdk": "^3.1.1",
+        "@stacks/transactions": "^7.0.0",
+        "vitest": "^2.0.0"
+    }
+}

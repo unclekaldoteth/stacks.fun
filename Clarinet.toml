@@ -1,0 +1,55 @@
+[project]
+name = "stacks-launchpad"
+description = "pump.fun-style Token Launchpad on Stacks with Clarity 4 and ALEX DEX Integration"
+authors = []
+telemetry = false
+cache_dir = "./.cache"
+
+# SIP-010 Trait
+[contracts.sip-010-trait]
+path = "contracts/sip-010-trait.clar"
+clarity_version = 3
+epoch = 3.0
+
+# Launchpad Factory
+[contracts.launchpad-factory]
+path = "contracts/launchpad-factory.clar"
+clarity_version = 3
+epoch = 3.0
+
+# Bonding Curve
+[contracts.bonding-curve]
+path = "contracts/bonding-curve.clar"
+clarity_version = 3
+epoch = 3.0
+depends_on = ["sip-010-trait"]
+
+# ALEX Graduation
+[contracts.alex-graduation]
+path = "contracts/alex-graduation.clar"
+clarity_version = 3
+epoch = 3.0
+
+# Launchpad Token Template
+[contracts.launchpad-token]
+path = "contracts/launchpad-token.clar"
+clarity_version = 3
+epoch = 3.0
+depends_on = ["sip-010-trait"]
+
+# Mainnet deployment
+[project.mainnet]
+name = "stacks-launchpad"
+node = "https://stacks-node-api.mainnet.stacks.co"
+
+# Testnet deployment  
+[project.testnet]
+name = "stacks-launchpad"
+node = "https://stacks-node-api.testnet.stacks.co"
+
+# Devnet for local testing
+[repl.settings]
+include_boot_contracts = []
+
+# Network settings
+[project.requirements]
