@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import TokenCard from '@/components/TokenCard';
 import KingOfTheHill from '@/components/KingOfTheHill';
+import RecentTrades from '@/components/RecentTrades';
 import { Token, getTokens, getTrendingTokens, Activity, getActivity } from '@/lib/api';
 import { formatAddress, getExplorerTxUrl } from '@/lib/stacks';
 
@@ -170,8 +171,12 @@ export default function Home() {
               </div>
             ) : (
               <div className="token-grid">
-                {filteredTokens.map((token) => (
-                  <TokenCard key={token.id} token={token} />
+                {filteredTokens.map((token, index) => (
+                  <TokenCard
+                    key={token.id}
+                    token={token}
+                    rank={activeTab === 'trending' ? index + 1 : undefined}
+                  />
                 ))}
               </div>
             )}
@@ -216,6 +221,23 @@ export default function Home() {
               </Link>
             </div>
           </div>
+        </div>
+
+        {/* Recent Trades Section */}
+        <div className="mt-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-black uppercase tracking-tight flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              Live Trades
+            </h2>
+            <Link
+              href="/activity"
+              className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:text-white transition-colors"
+            >
+              [view all →]
+            </Link>
+          </div>
+          <RecentTrades limit={8} showTitle={false} />
         </div>
       </div>
     </main>
