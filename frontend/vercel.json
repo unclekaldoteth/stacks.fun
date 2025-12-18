@@ -1,0 +1,19 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "package.json",
+            "use": "@vercel/next"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "/$1"
+        }
+    ],
+    "env": {
+        "NEXT_PUBLIC_STACKS_NETWORK": "testnet",
+        "NEXT_PUBLIC_CONTRACT_DEPLOYER": "ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM"
+    }
+}
