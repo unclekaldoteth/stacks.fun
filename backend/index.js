@@ -7,16 +7,23 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 const port = process.env.PORT || 3001;
 
+// Debug: Log environment variables (without exposing secrets)
+console.log('🔍 Environment check:');
+console.log('   SUPABASE_URL:', process.env.SUPABASE_URL ? '✅ Set' : '❌ Not set');
+console.log('   SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? '✅ Set' : '❌ Not set');
+console.log('   STACKS_NETWORK:', process.env.STACKS_NETWORK || 'not set');
+
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 let supabase = null;
 
-if (supabaseUrl && supabaseKey) {
+if (supabaseUrl && supabaseKey && supabaseUrl.startsWith('https://')) {
     supabase = createClient(supabaseUrl, supabaseKey);
     console.log('✅ Supabase client initialized');
 } else {
     console.warn('⚠️  Supabase credentials not found, using in-memory storage');
+    console.warn('   URL valid:', supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'empty');
 }
 
 // In-memory fallback storage
