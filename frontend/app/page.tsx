@@ -89,7 +89,7 @@ export default function Home() {
             [start a new coin]
           </Link>
           <div className="flex gap-4 text-sm font-bold terminal-text">
-            <a href="https://docs.alexlab.co" target="_blank" className="hover:underline text-[var(--accent-yellow)]">[how it works]</a>
+            <Link href="/how-it-works" className="hover:underline text-[var(--accent-yellow)]">[how it works]</Link>
             <span className="text-[var(--text-muted)]">|</span>
             <span className="text-[var(--text-secondary)]">graduates to ALEX lab</span>
           </div>
