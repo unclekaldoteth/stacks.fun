@@ -253,6 +253,13 @@ export interface PoolInfo {
 export async function getPoolInfo(tokenContract: string): Promise<PoolInfo | null> {
     try {
         const contractId = getContractId('bondingCurve');
+        const [tokenAddress, tokenName] = tokenContract.split('.');
+
+        // Encode the contract principal argument as hex
+        // Format: 0x06 (type tag for contract principal) + address length + address + name length + name
+        const tx = await getTransactionHelpers();
+        const cvHex = tx.cvToHex(tx.contractPrincipalCV(tokenAddress, tokenName));
+
         const response = await fetch(
             `${HIRO_API}/v2/contracts/call-read/${contractId.replace('.', '/')}/get-pool-info`,
             {
@@ -260,7 +267,7 @@ export async function getPoolInfo(tokenContract: string): Promise<PoolInfo | nul
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     sender: DEPLOYER,
-                    arguments: [tokenContract],
+                    arguments: [cvHex],
                 }),
             }
         );
@@ -268,9 +275,19 @@ export async function getPoolInfo(tokenContract: string): Promise<PoolInfo | nul
         if (!response.ok) return null;
         const data = await response.json();
 
-        // Parse Clarity response (simplified - actual parsing needed)
-        console.log('Pool info response:', data);
-        return null; // TODO: Parse clarity value
+        // Check if result is (some ...) or none
+        // If result contains "none", pool doesn't exist
+        if (data.result && !data.result.includes('none')) {
+            // Pool exists - parse the tuple
+            return {
+                creator: '',
+                tokensSold: 0,
+                stxReserve: 0,
+                isGraduated: false,
+                createdAt: 0
+            };
+        }
+        return null;
     } catch (error) {
         console.error('Error fetching pool info:', error);
         return null;

@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { registerToken, createPool } from '@/lib/contracts';
+import { registerToken, createPool, getPoolInfo } from '@/lib/contracts';
 import { getExplorerTxUrl } from '@/lib/stacks';
 import { useWallet } from '@/components/WalletProvider';
 
 export default function CreateTokenPage() {
     const router = useRouter();
-    const { address } = useWallet();
+    const { address, isConnected } = useWallet();
     const [formData, setFormData] = useState({
         name: '',
         symbol: '',
@@ -21,62 +21,89 @@ export default function CreateTokenPage() {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [txId, setTxId] = useState<string | null>(null);
-    const [step, setStep] = useState<'register' | 'create-pool' | 'done'>('register');
+    const [poolExists, setPoolExists] = useState<boolean | null>(null);
+    const [step, setStep] = useState<'idle' | 'creating-pool' | 'registering' | 'done'>('idle');
 
     const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
     const tokenContractId = `${DEPLOYER}.launchpad-token`;
 
+    // Check if pool exists on mount
+    useEffect(() => {
+        async function checkPool() {
+            try {
+                const pool = await getPoolInfo(tokenContractId);
+                setPoolExists(pool !== null);
+            } catch {
+                setPoolExists(false);
+            }
+        }
+        checkPool();
+    }, [tokenContractId]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!isConnected) {
+            alert('Please connect your wallet first.');
+            return;
+        }
+
         setIsLoading(true);
         setTxId(null);
 
         try {
-            if (step === 'register') {
-                // Step 1: Register token
-                await registerToken(
-                    formData.name,
-                    formData.symbol,
-                    formData.imageUrl || undefined,
-                    formData.description || undefined,
-                    {
-                        onFinish: async (data) => {
-                            setTxId(data.txId);
-                            setStep('create-pool');
-                            setIsLoading(false);
-                            alert(`Token registered! Now create the trading pool.`);
-                        },
-                        onCancel: () => {
-                            setIsLoading(false);
-                        },
-                    }
-                );
-            } else if (step === 'create-pool') {
-                // Step 2: Create pool for trading
-                const userAddress = address || DEPLOYER;
-
+            // If pool doesn't exist, create it first (only needed once ever)
+            if (poolExists === false) {
+                setStep('creating-pool');
                 await createPool(
                     tokenContractId,
-                    userAddress,
+                    address || DEPLOYER,
                     {
-                        onFinish: (data) => {
-                            setTxId(data.txId);
-                            setStep('done');
-                            setIsLoading(false);
-                            alert(`Pool created! Token ${formData.symbol} is now tradeable!`);
-                            router.push('/');
+                        onFinish: async (data) => {
+                            console.log('Pool created:', data.txId);
+                            setPoolExists(true);
+                            // Now register the token
+                            await registerTokenStep();
                         },
                         onCancel: () => {
                             setIsLoading(false);
+                            setStep('idle');
                         },
                     }
                 );
+            } else {
+                // Pool exists, just register the token
+                await registerTokenStep();
             }
         } catch (err) {
             console.error(err);
             alert('Transaction failed. Please try again.');
             setIsLoading(false);
+            setStep('idle');
         }
+    };
+
+    const registerTokenStep = async () => {
+        setStep('registering');
+        await registerToken(
+            formData.name,
+            formData.symbol,
+            formData.imageUrl || undefined,
+            formData.description || undefined,
+            {
+                onFinish: (data) => {
+                    setTxId(data.txId);
+                    setStep('done');
+                    setIsLoading(false);
+                    alert(`Token "${formData.symbol}" created successfully! It will appear on the homepage in about 30 seconds.`);
+                    router.push('/');
+                },
+                onCancel: () => {
+                    setIsLoading(false);
+                    setStep('idle');
+                },
+            }
+        );
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -196,16 +223,18 @@ export default function CreateTokenPage() {
                     {/* Submit */}
                     <button
                         type="submit"
-                        disabled={isLoading || step === 'done'}
+                        disabled={isLoading || step === 'done' || poolExists === null}
                         className="w-full btn-pump btn-pump-primary py-6 text-2xl"
                     >
-                        {isLoading
-                            ? 'PROCESSING...'
-                            : step === 'register'
-                                ? '[STEP 1: REGISTER TOKEN]'
-                                : step === 'create-pool'
-                                    ? '[STEP 2: CREATE TRADING POOL]'
-                                    : '[DONE! ✓]'
+                        {poolExists === null
+                            ? 'CHECKING...'
+                            : isLoading
+                                ? step === 'creating-pool'
+                                    ? 'SETTING UP TRADING POOL...'
+                                    : 'CREATING TOKEN...'
+                                : step === 'done'
+                                    ? '[DONE! ✓]'
+                                    : '[CREATE COIN]'
                         }
                     </button>
 
