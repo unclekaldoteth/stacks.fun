@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { registerToken, createPool, getPoolInfo } from '@/lib/contracts';
-import { getExplorerTxUrl } from '@/lib/stacks';
 import { useWallet } from '@/components/WalletProvider';
 
 export default function CreateTokenPage() {
