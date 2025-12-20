@@ -35,7 +35,24 @@ let inMemoryState = {
 
 // Middleware
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl)
+        if (!origin) return callback(null, true);
+
+        // Allow localhost, Vercel, and Railway domains
+        const allowedOrigins = [
+            'http://localhost:3000',
+            'http://localhost:3001',
+            'https://stacksfun.vercel.app',
+            'https://stacksfun-production.up.railway.app',
+            process.env.FRONTEND_URL
+        ].filter(Boolean);
+
+        if (allowedOrigins.includes(origin) || origin.includes('vercel.app') || origin.includes('railway.app')) {
+            return callback(null, true);
+        }
+        return callback(null, true); // Allow all for now
+    },
     credentials: true
 }));
 app.use(bodyParser.json());
