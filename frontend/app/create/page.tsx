@@ -302,7 +302,7 @@ export default function CreateTokenPage() {
                         {/* Submit */}
                         <button
                             type="submit"
-                            disabled={isLoading || step === 'done' || poolExists === null}
+                            disabled={isLoading || poolExists === null}
                             className="w-full btn-pump btn-pump-primary py-6 text-2xl"
                         >
                             {poolExists === null
@@ -311,9 +311,7 @@ export default function CreateTokenPage() {
                                     ? step === 'creating-pool'
                                         ? 'SETTING UP TRADING POOL...'
                                         : 'CREATING TOKEN...'
-                                    : step === 'done'
-                                        ? '[DONE! ✓]'
-                                        : '[CREATE COIN]'
+                                    : '[CREATE COIN]'
                             }
                         </button>
 
