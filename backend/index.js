@@ -300,6 +300,8 @@ app.post('/api/sync', async (req, res) => {
         res.json({
             success: true,
             message: `Synced ${result.syncedCount} tokens from blockchain`,
+            processedCount: result.processedCount,
+            syncedCount: result.syncedCount,
             network: result.network
         });
     } else {
