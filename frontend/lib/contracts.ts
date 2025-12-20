@@ -371,13 +371,19 @@ export async function getUserBalance(tokenContract: string, userAddress: string)
         if (!response.ok) return 0;
         const data = await response.json();
 
-        // Parse Clarity response: (tuple (balance uint))
-        // Result looks like: "(tuple (balance u12345))"
-        if (data.result) {
-            const match = data.result.match(/balance u(\d+)/);
-            if (match) {
+        // Response is hex-encoded Clarity value
+        // Example: { okay: true, result: '0x0c000000010762616c616e6365010000000000000000000000003b9db018' }
+        if (data.okay && data.result) {
+            // Parse the hex response using hexToCV and cvToValue
+            const { hexToCV, cvToValue } = tx;
+            const cv = hexToCV(data.result);
+            const value = cvToValue(cv);
+
+            // Result is { balance: bigint }
+            if (value && typeof value === 'object' && 'balance' in value) {
+                const balanceRaw = BigInt(value.balance as string | number | bigint);
                 // Balance is in 8-decimal format
-                return parseInt(match[1]) / 100_000_000;
+                return Number(balanceRaw) / 100_000_000;
             }
         }
         return 0;
