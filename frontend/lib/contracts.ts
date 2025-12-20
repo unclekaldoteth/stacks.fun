@@ -372,18 +372,30 @@ export async function getUserBalance(tokenContract: string, userAddress: string)
         const data = await response.json();
 
         // Response is hex-encoded Clarity value
-        // Example: { okay: true, result: '0x0c000000010762616c616e6365010000000000000000000000003b9db018' }
+        // Example: { okay: true, result: '0x0c...' }
         if (data.okay && data.result) {
             // Parse the hex response using hexToCV and cvToValue
             const { hexToCV, cvToValue } = tx;
             const cv = hexToCV(data.result);
             const value = cvToValue(cv);
 
-            // Result is { balance: bigint }
+            // cvToValue returns: { balance: { type: 'uint', value: '1000199974' } }
+            // We need to extract the value string
             if (value && typeof value === 'object' && 'balance' in value) {
-                const balanceRaw = BigInt(value.balance as string | number | bigint);
+                const balanceObj = value.balance as { type?: string; value?: string } | bigint | number | string;
+                let balanceRaw: number;
+
+                if (typeof balanceObj === 'object' && balanceObj !== null && 'value' in balanceObj) {
+                    // Handle { type: 'uint', value: '123' } format
+                    balanceRaw = parseInt(balanceObj.value as string, 10);
+                } else if (typeof balanceObj === 'bigint') {
+                    balanceRaw = Number(balanceObj);
+                } else {
+                    balanceRaw = parseInt(String(balanceObj), 10);
+                }
+
                 // Balance is in 8-decimal format
-                return Number(balanceRaw) / 100_000_000;
+                return balanceRaw / 100_000_000;
             }
         }
         return 0;
