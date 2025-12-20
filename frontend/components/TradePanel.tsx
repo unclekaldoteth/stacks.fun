@@ -201,16 +201,37 @@ export default function TradePanel({
                 </div>
 
                 {showSlippage && (
-                    <div className="flex gap-2 mb-3 p-2 bg-zinc-900 rounded border border-[var(--border)]">
-                        {[0.5, 1, 3, 5].map(s => (
+                    <div className="mb-3 p-3 bg-zinc-900 rounded border border-[var(--border)]">
+                        <div className="flex gap-2 mb-2">
+                            {[0.5, 1, 3, 5, 10].map(s => (
+                                <button
+                                    key={s}
+                                    onClick={() => { setSlippage(s); setShowSlippage(false); }}
+                                    className={`flex-1 text-[10px] py-1.5 rounded font-bold ${slippage === s ? 'bg-[var(--accent-orange)] text-black' : 'bg-zinc-800 text-white hover:bg-zinc-700'}`}
+                                >
+                                    {s}%
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                            <span className="text-[10px] text-[var(--text-muted)]">Custom:</span>
+                            <input
+                                type="number"
+                                min="0.1"
+                                max="50"
+                                step="0.1"
+                                value={slippage}
+                                onChange={(e) => setSlippage(Math.min(50, Math.max(0.1, parseFloat(e.target.value) || 1)))}
+                                className="flex-1 bg-zinc-800 border border-[var(--border)] rounded px-2 py-1 text-[11px] text-white font-mono w-16"
+                            />
+                            <span className="text-[10px] text-[var(--text-muted)]">%</span>
                             <button
-                                key={s}
-                                onClick={() => { setSlippage(s); setShowSlippage(false); }}
-                                className={`flex-1 text-[10px] py-1 rounded ${slippage === s ? 'bg-white text-black' : 'text-white'}`}
+                                onClick={() => setShowSlippage(false)}
+                                className="text-[10px] bg-[var(--accent-orange)] text-black px-3 py-1 rounded font-bold"
                             >
-                                {s}%
+                                OK
                             </button>
-                        ))}
+                        </div>
                     </div>
                 )}
 
