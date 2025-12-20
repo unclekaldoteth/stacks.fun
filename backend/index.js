@@ -232,11 +232,16 @@ async function syncTokensFromBlockchain() {
 
             if (supabase) {
                 // First check if token already exists
-                const { data: existing } = await supabase
+                const { data: existing, error: checkError } = await supabase
                     .from('tokens')
                     .select('id')
                     .eq('symbol', symbol)
-                    .single();
+                    .maybeSingle();
+
+                if (checkError) {
+                    console.error(`Error checking ${symbol}:`, checkError.message);
+                    continue;
+                }
 
                 if (!existing) {
                     // Insert new token
