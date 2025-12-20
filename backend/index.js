@@ -345,27 +345,47 @@ app.get('/api/tokens/:identifier', async (req, res) => {
         const { identifier } = req.params;
 
         if (supabase) {
-            // Try to find by symbol first, then by ID
-            let query = supabase.from('tokens').select('*');
+            // Try multiple approaches to find the token
+            let data = null;
+            let error = null;
 
-            if (identifier.length <= 10) {
-                query = query.eq('symbol', identifier.toUpperCase());
-            } else {
-                query = query.eq('id', identifier);
+            // Try by ID first (if it looks like a UUID)
+            if (identifier.length > 10) {
+                const result = await supabase.from('tokens').select('*').eq('id', identifier).single();
+                data = result.data;
+                error = result.error;
             }
 
-            const { data, error } = await query.single();
-
-            if (error) {
-                if (error.code === 'PGRST116') {
-                    return res.status(404).json({ error: 'Token not found' });
-                }
-                throw error;
+            // Try exact symbol match
+            if (!data) {
+                const result = await supabase.from('tokens').select('*').eq('symbol', identifier).single();
+                data = result.data;
+                if (result.error?.code !== 'PGRST116') error = result.error;
             }
+
+            // Try uppercase symbol match
+            if (!data) {
+                const result = await supabase.from('tokens').select('*').eq('symbol', identifier.toUpperCase()).single();
+                data = result.data;
+                if (result.error?.code !== 'PGRST116') error = result.error;
+            }
+
+            // Try lowercase symbol match
+            if (!data) {
+                const result = await supabase.from('tokens').select('*').eq('symbol', identifier.toLowerCase()).single();
+                data = result.data;
+                if (result.error?.code !== 'PGRST116') error = result.error;
+            }
+
+            if (!data) {
+                return res.status(404).json({ error: 'Token not found' });
+            }
+
+            if (error) throw error;
             res.json(data);
         } else {
             const token = inMemoryState.tokens.find(
-                t => t.symbol === identifier.toUpperCase() || t.id === identifier
+                t => t.symbol.toLowerCase() === identifier.toLowerCase() || t.id === identifier
             );
             if (!token) {
                 return res.status(404).json({ error: 'Token not found' });
