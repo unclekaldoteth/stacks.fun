@@ -171,6 +171,73 @@ app.post('/api/seed', async (req, res) => {
     }
 });
 
+// Sync tokens from blockchain (fallback when Chainhooks don't deliver)
+app.post('/api/sync', async (req, res) => {
+    try {
+        const DEPLOYER = process.env.CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
+        const NETWORK = process.env.STACKS_NETWORK === 'mainnet' ? 'mainnet' : 'testnet';
+        const API_BASE = NETWORK === 'mainnet'
+            ? 'https://api.hiro.so'
+            : 'https://api.testnet.hiro.so';
+
+        console.log('🔄 Syncing tokens from blockchain...');
+
+        // Fetch recent transactions for the launchpad-factory contract
+        const txUrl = `${API_BASE}/extended/v1/address/${DEPLOYER}.launchpad-factory/transactions?limit=50`;
+        const txResponse = await fetch(txUrl);
+        const txData = await txResponse.json();
+
+        let syncedCount = 0;
+
+        for (const tx of txData.results || []) {
+            if (tx.tx_status !== 'success') continue;
+            if (tx.tx_type !== 'contract_call') continue;
+            if (tx.contract_call?.function_name !== 'register-token') continue;
+
+            const args = tx.contract_call.function_args || [];
+            const name = args.find(a => a.name === 'name')?.repr?.replace(/"/g, '') || 'Unknown';
+            const symbol = args.find(a => a.name === 'symbol')?.repr?.replace(/"/g, '') || 'UNK';
+            const bondingCurve = args.find(a => a.name === 'bonding-curve')?.repr?.replace(/'/g, '') || '';
+            const description = args.find(a => a.name === 'description')?.repr?.replace(/\(some u"|"\)/g, '') || '';
+
+            const tokenData = {
+                contract_address: bondingCurve || `${DEPLOYER}.${symbol.toLowerCase()}`,
+                name: name,
+                symbol: symbol,
+                creator: tx.sender_address,
+                image_uri: null,
+                description: description,
+                tokens_sold: 0,
+                stx_reserve: 0,
+                current_price: 0.01,
+                market_cap: 0,
+                is_graduated: false,
+                created_at: tx.burn_block_time_iso
+            };
+
+            if (supabase) {
+                const { error } = await supabase
+                    .from('tokens')
+                    .upsert(tokenData, { onConflict: 'symbol' });
+
+                if (!error) {
+                    syncedCount++;
+                    console.log(`✅ Synced token: ${symbol}`);
+                }
+            }
+        }
+
+        res.json({
+            success: true,
+            message: `Synced ${syncedCount} tokens from blockchain`,
+            network: NETWORK
+        });
+    } catch (error) {
+        console.error('Sync error:', error);
+        res.status(500).json({ error: 'Failed to sync', details: error.message });
+    }
+});
+
 // Get trending tokens (highest market cap)
 app.get('/api/tokens/trending', async (req, res) => {
     try {
