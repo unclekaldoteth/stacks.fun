@@ -211,7 +211,6 @@ export default function TokenDetailPage() {
                         <div className="sticky top-24 space-y-6">
                             <TradePanel
                                 token={token}
-                                userStxBalance={100}
                                 onTradeComplete={() => {
                                     getToken(symbol).then(setToken);
                                     getTokenTrades(token.id).then(setTrades);
