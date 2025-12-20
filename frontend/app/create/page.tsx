@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { registerToken } from '@/lib/contracts';
+import { registerToken, createPool } from '@/lib/contracts';
 import { getExplorerTxUrl } from '@/lib/stacks';
+import { useWallet } from '@/components/WalletProvider';
 
 export default function CreateTokenPage() {
     const router = useRouter();
+    const { address } = useWallet();
     const [formData, setFormData] = useState({
         name: '',
         symbol: '',
@@ -19,6 +21,10 @@ export default function CreateTokenPage() {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [txId, setTxId] = useState<string | null>(null);
+    const [step, setStep] = useState<'register' | 'create-pool' | 'done'>('register');
+
+    const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
+    const tokenContractId = `${DEPLOYER}.launchpad-token`;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,26 +32,49 @@ export default function CreateTokenPage() {
         setTxId(null);
 
         try {
-            await registerToken(
-                formData.name,
-                formData.symbol,
-                formData.imageUrl || undefined,
-                formData.description || undefined,
-                {
-                    onFinish: (data) => {
-                        setTxId(data.txId);
-                        setIsLoading(false);
-                        // Show success message with link to explorer
-                        alert(`Token registration submitted! Transaction: ${data.txId}`);
-                    },
-                    onCancel: () => {
-                        setIsLoading(false);
-                    },
-                }
-            );
+            if (step === 'register') {
+                // Step 1: Register token
+                await registerToken(
+                    formData.name,
+                    formData.symbol,
+                    formData.imageUrl || undefined,
+                    formData.description || undefined,
+                    {
+                        onFinish: async (data) => {
+                            setTxId(data.txId);
+                            setStep('create-pool');
+                            setIsLoading(false);
+                            alert(`Token registered! Now create the trading pool.`);
+                        },
+                        onCancel: () => {
+                            setIsLoading(false);
+                        },
+                    }
+                );
+            } else if (step === 'create-pool') {
+                // Step 2: Create pool for trading
+                const userAddress = address || DEPLOYER;
+
+                await createPool(
+                    tokenContractId,
+                    userAddress,
+                    {
+                        onFinish: (data) => {
+                            setTxId(data.txId);
+                            setStep('done');
+                            setIsLoading(false);
+                            alert(`Pool created! Token ${formData.symbol} is now tradeable!`);
+                            router.push('/');
+                        },
+                        onCancel: () => {
+                            setIsLoading(false);
+                        },
+                    }
+                );
+            }
         } catch (err) {
             console.error(err);
-            alert('Failed to register token. Make sure you have a Stacks wallet connected.');
+            alert('Transaction failed. Please try again.');
             setIsLoading(false);
         }
     };
@@ -167,10 +196,17 @@ export default function CreateTokenPage() {
                     {/* Submit */}
                     <button
                         type="submit"
-                        disabled={isLoading}
+                        disabled={isLoading || step === 'done'}
                         className="w-full btn-pump btn-pump-primary py-6 text-2xl"
                     >
-                        {isLoading ? 'INITIATING DEPLOYMENT...' : '[CREATE COIN]'}
+                        {isLoading
+                            ? 'PROCESSING...'
+                            : step === 'register'
+                                ? '[STEP 1: REGISTER TOKEN]'
+                                : step === 'create-pool'
+                                    ? '[STEP 2: CREATE TRADING POOL]'
+                                    : '[DONE! ✓]'
+                        }
                     </button>
 
                     <div className="text-center">
