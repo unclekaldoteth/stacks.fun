@@ -1,0 +1,18 @@
+---
+id: 0
+name: Deploy bonding-curve-v2 only
+network: testnet
+stacks-node: "https://api.testnet.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: bonding-curve-v2
+            expected-sender: ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM
+            cost: 101640
+            path: contracts/bonding-curve-v2.clar
+            anchor-block-only: true
+            clarity-version: 3
+      epoch: "3.0"
