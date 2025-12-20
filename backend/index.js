@@ -202,12 +202,17 @@ async function syncTokensFromBlockchain() {
         const txResponse = await fetch(txUrl);
         const txData = await txResponse.json();
 
+        console.log(`🔍 Found ${txData.results?.length || 0} transactions from ${DEPLOYER}.launchpad-factory`);
+
         let syncedCount = 0;
+        let processedCount = 0;
 
         for (const tx of txData.results || []) {
             if (tx.tx_status !== 'success') continue;
             if (tx.tx_type !== 'contract_call') continue;
             if (tx.contract_call?.function_name !== 'register-token') continue;
+
+            processedCount++;
 
             const args = tx.contract_call.function_args || [];
             const name = args.find(a => a.name === 'name')?.repr?.replace(/"/g, '') || 'Unknown';
@@ -255,11 +260,15 @@ async function syncTokensFromBlockchain() {
                         syncedCount++;
                         console.log(`✅ Synced new token: ${symbol}`);
                     }
+                } else {
+                    console.log(`⏭️ Token ${symbol} already exists`);
                 }
             }
         }
 
-        return { success: true, syncedCount, network: NETWORK };
+        console.log(`📊 Sync complete: ${processedCount} register-token txs processed, ${syncedCount} new tokens added`);
+
+        return { success: true, syncedCount, processedCount, network: NETWORK };
     } catch (error) {
         console.error('Sync error:', error);
         return { success: false, error: error.message };
