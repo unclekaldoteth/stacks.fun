@@ -218,7 +218,21 @@ async function syncTokensFromBlockchain() {
             const name = args.find(a => a.name === 'name')?.repr?.replace(/"/g, '') || 'Unknown';
             const symbol = args.find(a => a.name === 'symbol')?.repr?.replace(/"/g, '') || 'UNK';
             const bondingCurve = args.find(a => a.name === 'bonding-curve')?.repr?.replace(/'/g, '') || '';
-            const description = args.find(a => a.name === 'description')?.repr?.replace(/\(some u"|"\)/g, '') || '';
+
+            // Parse optional fields with (some u"...") format
+            const imageUriRaw = args.find(a => a.name === 'image-uri')?.repr || '';
+            const descriptionRaw = args.find(a => a.name === 'description')?.repr || '';
+
+            // Extract value from (some u"VALUE") format
+            const extractOptional = (raw) => {
+                if (!raw || raw === 'none') return null;
+                // Match (some u"...") pattern
+                const match = raw.match(/\(some u"(.*)"\)/);
+                return match ? match[1] : null;
+            };
+
+            const imageUri = extractOptional(imageUriRaw);
+            const description = extractOptional(descriptionRaw) || '';
 
             // Use tx_id as unique contract address since all tokens share the same bonding curve
             const tokenData = {
@@ -226,7 +240,7 @@ async function syncTokensFromBlockchain() {
                 name: name,
                 symbol: symbol,
                 creator: tx.sender_address,
-                image_uri: null,
+                image_uri: imageUri,
                 description: description,
                 tokens_sold: 0,
                 stx_reserve: 0,
@@ -241,7 +255,7 @@ async function syncTokensFromBlockchain() {
                 console.log(`🔍 Checking if ${symbol} exists...`);
                 const { data: existing, error: checkError } = await supabase
                     .from('tokens')
-                    .select('id, symbol')
+                    .select('id, symbol, image_uri')
                     .eq('symbol', symbol)
                     .maybeSingle();
 
@@ -264,6 +278,18 @@ async function syncTokensFromBlockchain() {
                     } else {
                         syncedCount++;
                         console.log(`✅ Synced new token: ${symbol}`);
+                    }
+                } else if (!existing.image_uri && imageUri) {
+                    // Update existing token with missing image_uri
+                    console.log(`   Updating ${symbol} with image_uri`);
+                    const { error } = await supabase
+                        .from('tokens')
+                        .update({ image_uri: imageUri, description: description || existing.description })
+                        .eq('id', existing.id);
+
+                    if (!error) {
+                        syncedCount++;
+                        console.log(`✅ Updated ${symbol} with image`);
                     }
                 } else {
                     console.log(`⏭️ Token ${symbol} already exists`);
