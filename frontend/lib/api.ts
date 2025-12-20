@@ -13,6 +13,9 @@ export interface Token {
     creator: string;
     image_uri?: string;
     description?: string;
+    twitter?: string;
+    telegram?: string;
+    website?: string;
     tokens_sold: number;
     stx_reserve: number;
     current_price: number;
@@ -90,7 +93,7 @@ export function generateBondingCurveData(tokensSold: number, points: number = 50
     const data = [];
     const maxTokens = Math.max(tokensSold * 1.5, 1000000);
     const step = maxTokens / points;
-    
+
     for (let i = 0; i <= points; i++) {
         const sold = i * step;
         data.push({
@@ -117,17 +120,17 @@ export async function checkHealth() {
 }
 
 // Get all tokens
-export async function getTokens(options?: { 
-    orderBy?: string; 
-    order?: 'asc' | 'desc'; 
-    graduated?: boolean 
+export async function getTokens(options?: {
+    orderBy?: string;
+    order?: 'asc' | 'desc';
+    graduated?: boolean
 }): Promise<Token[]> {
     try {
         const params = new URLSearchParams();
         if (options?.orderBy) params.set('orderBy', options.orderBy);
         if (options?.order) params.set('order', options.order);
         if (options?.graduated !== undefined) params.set('graduated', String(options.graduated));
-        
+
         const response = await fetch(`${API_URL}/api/tokens?${params.toString()}`);
         if (!response.ok) throw new Error('Failed to fetch tokens');
         return await response.json();
@@ -181,7 +184,7 @@ export async function getActivity(limit: number = 50, type?: string): Promise<Ac
     try {
         const params = new URLSearchParams({ limit: String(limit) });
         if (type) params.set('type', type);
-        
+
         const response = await fetch(`${API_URL}/api/activity?${params.toString()}`);
         if (!response.ok) throw new Error('Failed to fetch activity');
         return await response.json();
