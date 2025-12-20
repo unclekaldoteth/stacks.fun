@@ -21,8 +21,11 @@
 (define-constant ONE-8 u100000000) ;; 1.0 in 8-decimal fixed point
 
 ;; Bonding curve parameters
-(define-constant INITIAL-PRICE u1000000)        ;; 0.01 STX per token (in 8-decimal)
-(define-constant SLOPE u100)                     ;; Price increase per token sold
+;; NEW: Lower initial price, higher slope for more dynamic pricing
+;; At launch: 1 STX buys 1000 tokens (0.001 STX per token)
+;; Price increases 10x faster as tokens are bought
+(define-constant INITIAL-PRICE u10000)           ;; 0.0001 in 8-decimal = 0.001 STX/token effective
+(define-constant SLOPE u10000)                    ;; 100x more aggressive slope
 (define-constant GRADUATION-THRESHOLD u6900000000000) ;; ~69,000 STX market cap (8-decimal)
 (define-constant TOTAL-SUPPLY u100000000000000000) ;; 1 billion tokens (8-decimal)
 (define-constant CURVE-SUPPLY u80000000000000000)  ;; 800M tokens on curve (8-decimal)
