@@ -91,10 +91,33 @@ export default function CreateTokenPage() {
             formData.imageUrl || undefined,
             formData.description || undefined,
             {
-                onFinish: (data) => {
+                onFinish: async (data) => {
                     setTxId(data.txId);
                     setStep('done');
                     setIsLoading(false);
+
+                    // Save social links to backend (after token syncs)
+                    if (formData.twitter || formData.telegram || formData.website) {
+                        // Wait a bit for backend to sync the token, then save social links
+                        setTimeout(async () => {
+                            try {
+                                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+                                await fetch(`${API_URL}/api/tokens/${formData.symbol}`, {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        creator: address,
+                                        twitter: formData.twitter || undefined,
+                                        telegram: formData.telegram || undefined,
+                                        website: formData.website || undefined,
+                                    }),
+                                });
+                            } catch (err) {
+                                console.error('Failed to save social links:', err);
+                            }
+                        }, 35000); // Wait 35 seconds for sync to complete
+                    }
+
                     alert(`Token "${formData.symbol}" created successfully! It will appear on the homepage in about 30 seconds.`);
                     router.push('/');
                 },
