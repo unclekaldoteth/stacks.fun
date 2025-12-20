@@ -171,16 +171,14 @@ app.post('/api/seed', async (req, res) => {
     }
 });
 
-// Sync tokens from blockchain (fallback when Chainhooks don't deliver)
-app.post('/api/sync', async (req, res) => {
+// Sync function to fetch tokens from blockchain
+async function syncTokensFromBlockchain() {
     try {
         const DEPLOYER = process.env.CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
         const NETWORK = process.env.STACKS_NETWORK === 'mainnet' ? 'mainnet' : 'testnet';
         const API_BASE = NETWORK === 'mainnet'
             ? 'https://api.hiro.so'
             : 'https://api.testnet.hiro.so';
-
-        console.log('🔄 Syncing tokens from blockchain...');
 
         // Fetch recent transactions for the launchpad-factory contract
         const txUrl = `${API_BASE}/extended/v1/address/${DEPLOYER}.launchpad-factory/transactions?limit=50`;
@@ -222,21 +220,49 @@ app.post('/api/sync', async (req, res) => {
 
                 if (!error) {
                     syncedCount++;
-                    console.log(`✅ Synced token: ${symbol}`);
                 }
             }
         }
 
-        res.json({
-            success: true,
-            message: `Synced ${syncedCount} tokens from blockchain`,
-            network: NETWORK
-        });
+        return { success: true, syncedCount, network: NETWORK };
     } catch (error) {
         console.error('Sync error:', error);
-        res.status(500).json({ error: 'Failed to sync', details: error.message });
+        return { success: false, error: error.message };
+    }
+}
+
+// Start automatic sync every 30 seconds
+const SYNC_INTERVAL = 30 * 1000; // 30 seconds
+setInterval(async () => {
+    const result = await syncTokensFromBlockchain();
+    if (result.syncedCount > 0) {
+        console.log(`🔄 Auto-sync: ${result.syncedCount} new tokens`);
+    }
+}, SYNC_INTERVAL);
+
+// Initial sync on startup (after 5 seconds)
+setTimeout(async () => {
+    console.log('🔄 Running initial token sync...');
+    const result = await syncTokensFromBlockchain();
+    console.log(`✅ Initial sync complete: ${result.syncedCount} tokens`);
+}, 5000);
+
+// Manual sync endpoint
+app.post('/api/sync', async (req, res) => {
+    console.log('🔄 Manual sync triggered...');
+    const result = await syncTokensFromBlockchain();
+
+    if (result.success) {
+        res.json({
+            success: true,
+            message: `Synced ${result.syncedCount} tokens from blockchain`,
+            network: result.network
+        });
+    } else {
+        res.status(500).json({ error: 'Failed to sync', details: result.error });
     }
 });
+
 
 // Get trending tokens (highest market cap)
 app.get('/api/tokens/trending', async (req, res) => {
