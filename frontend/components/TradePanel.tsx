@@ -88,7 +88,7 @@ export default function TradePanel({
     const handleTrade = async () => {
         if (!numAmount || token.is_graduated) return;
 
-        if (!isConnected) {
+        if (!isConnected || !address) {
             alert('Please connect your wallet to trade.');
             return;
         }
@@ -99,6 +99,26 @@ export default function TradePanel({
         try {
             const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
             const tokenContractId = `${DEPLOYER}.launchpad-token`;
+
+            // Check if pool exists on bonding-curve-v2, create if not
+            const { getPoolInfo, createPool } = await import('@/lib/contracts');
+            const poolInfo = await getPoolInfo(tokenContractId);
+
+            if (!poolInfo) {
+                // Pool doesn't exist on v2 - need to create it first
+                alert('Creating pool on bonding-curve-v2. Please approve the transaction, then try trading again.');
+                await createPool(tokenContractId, address, {
+                    onFinish: (data) => {
+                        console.log('Pool created on v2:', data.txId);
+                        alert('Pool creation submitted! Wait ~30 seconds for it to confirm, then try your trade again.');
+                        setIsLoading(false);
+                    },
+                    onCancel: () => {
+                        setIsLoading(false);
+                    },
+                });
+                return;
+            }
 
             if (mode === 'buy') {
                 await buyTokens(
