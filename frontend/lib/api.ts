@@ -68,21 +68,22 @@ export interface LeaderboardEntry {
 // Must match the smart contract math!
 // ============================================
 
-// Contract constants (from bonding-curve.clar):
-// INITIAL-PRICE = u10000 (in 8-decimal fixed point) = 0.001 STX/token effective
-// SLOPE = u10000 (100x more aggressive)
+// Contract constants (from bonding-curve.clar ON-CHAIN):
+// INITIAL-PRICE = u1000000 (in 8-decimal fixed point)
+// SLOPE = u100
 // ONE-8 = u100000000
 // 
 // Contract formula: tokens = (stx_micro * ONE_8) / price
 // 
 // At launch (0 tokens sold):
-// price = 10,000 (8-decimal)
-// tokens = (1 STX * 1,000,000 * 100,000,000) / 10,000
-//        = 100,000,000,000 / 10,000 = 10,000,000
-//        = 10,000,000 (8-decimal) = 1000 tokens per STX!
+// price = 1,000,000 (8-decimal)
+// tokens = (10 STX * 1,000,000 * 100,000,000) / 1,000,000
+//        = 1,000,000,000 (8-decimal) = 10 tokens
+// 
+// Effective price at launch: 1 STX per token
 
-const INITIAL_PRICE_8DEC = 10000; // u10000 from contract (NEW: 100x lower)
-const SLOPE_8DEC = 10000; // u10000 from contract (NEW: 100x higher)
+const INITIAL_PRICE_8DEC = 1000000; // u1000000 from on-chain contract
+const SLOPE_8DEC = 100; // u100 from on-chain contract
 const ONE_8 = 100000000; // u100000000 from contract
 const GRADUATION_THRESHOLD = 69000; // ~69,000 STX market cap
 
