@@ -46,10 +46,15 @@ export default function TradePanel({
         setTxId(null);
 
         try {
+            // Use the bonding-curve contract with the launchpad-token contract
+            // All tokens share the same bonding-curve, identified by the launchpad-token contract
+            const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
+            const tokenContractId = `${DEPLOYER}.launchpad-token`;
+
             if (mode === 'buy') {
                 // Buy tokens with STX
                 await buyTokens(
-                    token.contract_address,
+                    tokenContractId,
                     numAmount, // STX amount
                     minOutput, // Minimum tokens to receive
                     {
@@ -66,7 +71,7 @@ export default function TradePanel({
             } else {
                 // Sell tokens for STX
                 await sellTokens(
-                    token.contract_address,
+                    tokenContractId,
                     numAmount, // Token amount
                     minOutput, // Minimum STX to receive
                     {
@@ -83,7 +88,7 @@ export default function TradePanel({
             }
         } catch (error) {
             console.error('Trade failed:', error);
-            alert('Trade failed. Make sure you have a Stacks wallet connected.');
+            alert('Trade failed. Please try again or check your wallet.');
         } finally {
             setIsLoading(false);
         }
