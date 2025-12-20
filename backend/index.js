@@ -220,8 +220,9 @@ async function syncTokensFromBlockchain() {
             const bondingCurve = args.find(a => a.name === 'bonding-curve')?.repr?.replace(/'/g, '') || '';
             const description = args.find(a => a.name === 'description')?.repr?.replace(/\(some u"|"\)/g, '') || '';
 
+            // Use tx_id as unique contract address since all tokens share the same bonding curve
             const tokenData = {
-                contract_address: bondingCurve || `${DEPLOYER}.${symbol.toLowerCase()}`,
+                contract_address: tx.tx_id,  // tx_id is unique per token creation
                 name: name,
                 symbol: symbol,
                 creator: tx.sender_address,
