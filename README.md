@@ -1,10 +1,10 @@
-# Stacks.fun 🚀
+# Stacks.fun
 
 A token launchpad on the Stacks blockchain with bonding curves, secured by Bitcoin.
 
 **Live Demo:** [stacksfun.vercel.app](https://stacksfun.vercel.app)
 
-## 🎯 Overview
+## Overview
 
 Stacks.fun enables anyone to launch tokens on Stacks using an automated bonding curve. When tokens reach sufficient market cap, they graduate to ALEX DEX for full trading.
 
@@ -16,7 +16,7 @@ Stacks.fun enables anyone to launch tokens on Stacks using an automated bonding 
 - **Real-time events** - Chainhook integration for live updates
 - **Creator rewards** - 2% of all trades go to token creators
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
@@ -32,7 +32,7 @@ Stacks.fun enables anyone to launch tokens on Stacks using an automated bonding 
 └─────────────────┘
 ```
 
-## 📦 Smart Contracts
+## Smart Contracts
 
 | Contract | Description |
 |----------|-------------|
@@ -43,14 +43,14 @@ Stacks.fun enables anyone to launch tokens on Stacks using an automated bonding 
 
 **Testnet Deployer:** `ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM`
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend:** Next.js 15, TypeScript, Tailwind CSS
 - **Backend:** Node.js, Express, Supabase
 - **Blockchain:** Stacks, Clarity smart contracts
 - **Infra:** Vercel, Railway, Hiro Chainhooks
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -90,7 +90,7 @@ clarinet test
 clarinet deployments apply -p deployments/default.testnet-plan.yaml
 ```
 
-## 📊 How It Works
+## How It Works
 
 1. **Create Token** - Define name, symbol, description
 2. **Trade** - Buy/sell on bonding curve (P = k × supply²)
@@ -103,17 +103,17 @@ clarinet deployments apply -p deployments/default.testnet-plan.yaml
 | Platform | Treasury | 2% |
 | Creator | Token creator | 2% |
 
-## 🔗 Links
+## Links
 
 - **Live App:** [stacksfun.vercel.app](https://stacksfun.vercel.app)
 - **API:** [stacksfun-production.up.railway.app](https://stacksfun-production.up.railway.app)
 - **Stacks:** [stacks.co](https://stacks.co)
 - **ALEX Lab:** [alexlab.co](https://alexlab.co)
 
-## 📄 License
+## License
 
 MIT
 
 ---
 
-Built for Stacks Builder Challenge 🧱
+Built for Stacks Builder Challenge
