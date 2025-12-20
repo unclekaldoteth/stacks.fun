@@ -231,12 +231,25 @@ async function syncTokensFromBlockchain() {
             };
 
             if (supabase) {
-                const { error } = await supabase
+                // First check if token already exists
+                const { data: existing } = await supabase
                     .from('tokens')
-                    .upsert(tokenData, { onConflict: 'symbol' });
+                    .select('id')
+                    .eq('symbol', symbol)
+                    .single();
 
-                if (!error) {
-                    syncedCount++;
+                if (!existing) {
+                    // Insert new token
+                    const { error } = await supabase
+                        .from('tokens')
+                        .insert(tokenData);
+
+                    if (error) {
+                        console.error(`Failed to insert ${symbol}:`, error.message);
+                    } else {
+                        syncedCount++;
+                        console.log(`✅ Synced new token: ${symbol}`);
+                    }
                 }
             }
         }
