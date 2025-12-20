@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { calculateBuyAmount, calculateSellReturn, Token } from '@/lib/api';
 import { buyTokens, sellTokens } from '@/lib/contracts';
-import { getExplorerTxUrl } from '@/lib/stacks';
 import { useWallet } from '@/components/WalletProvider';
 
 interface TradePanelProps {
@@ -13,50 +12,66 @@ interface TradePanelProps {
 
 type TradeMode = 'buy' | 'sell';
 
+const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
+const STACKS_API = process.env.NEXT_PUBLIC_STACKS_API || 'https://api.testnet.hiro.so';
+
 export default function TradePanel({
     token,
     onTradeComplete
 }: TradePanelProps) {
-    const { balance: stxBalance, isConnected, address } = useWallet();
+    const { isConnected, address } = useWallet();
     const [mode, setMode] = useState<TradeMode>('buy');
     const [amount, setAmount] = useState<string>('');
     const [slippage, setSlippage] = useState<number>(1);
     const [isLoading, setIsLoading] = useState(false);
     const [showSlippage, setShowSlippage] = useState(false);
     const [txId, setTxId] = useState<string | null>(null);
+    const [stxBalance, setStxBalance] = useState<number>(0);
     const [tokenBalance, setTokenBalance] = useState<number>(0);
+    const [balanceLoading, setBalanceLoading] = useState(false);
 
-    // Parse STX balance from wallet (format: "499.123456 STX")
-    const userStxBalance = useMemo(() => {
-        if (!stxBalance) return 0;
-        const match = stxBalance.match(/^([\d.]+)/);
-        return match ? parseFloat(match[1]) : 0;
-    }, [stxBalance]);
-
-    // Fetch user's token balance from the bonding curve contract
-    useEffect(() => {
-        async function fetchTokenBalance() {
-            if (!address) {
-                setTokenBalance(0);
-                return;
-            }
-
-            try {
-                const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
-                const tokenContract = `${DEPLOYER}.launchpad-token`;
-
-                // Import the getUserBalance function from contracts
-                const { getUserBalance } = await import('@/lib/contracts');
-                const balance = await getUserBalance(tokenContract, address);
-                setTokenBalance(balance);
-            } catch (error) {
-                console.error('Error fetching token balance:', error);
-                setTokenBalance(0);
-            }
+    // Fetch both STX and token balances
+    const fetchBalances = useCallback(async () => {
+        if (!address) {
+            setStxBalance(0);
+            setTokenBalance(0);
+            return;
         }
 
-        fetchTokenBalance();
-    }, [address, txId]); // Refresh after trade
+        setBalanceLoading(true);
+
+        try {
+            // 1. Fetch STX balance from Stacks API
+            const stxResponse = await fetch(`${STACKS_API}/extended/v1/address/${address}/stx`);
+            if (stxResponse.ok) {
+                const stxData = await stxResponse.json();
+                // balance is in micro-STX, convert to STX
+                const balanceInStx = parseInt(stxData.balance || '0') / 1_000_000;
+                setStxBalance(balanceInStx);
+            }
+
+            // 2. Fetch token balance from bonding-curve contract using proper encoding
+            try {
+                const { getUserBalance } = await import('@/lib/contracts');
+                const tokenContract = `${DEPLOYER}.launchpad-token`;
+                const balance = await getUserBalance(tokenContract, address);
+                setTokenBalance(balance);
+                console.log('Token balance fetched:', balance);
+            } catch (tokenError) {
+                console.error('Error fetching token balance:', tokenError);
+                setTokenBalance(0);
+            }
+        } catch (error) {
+            console.error('Error fetching balances:', error);
+        } finally {
+            setBalanceLoading(false);
+        }
+    }, [address]);
+
+    // Fetch balances on mount and when address/txId changes
+    useEffect(() => {
+        fetchBalances();
+    }, [address, txId, fetchBalances]);
 
     const numAmount = parseFloat(amount) || 0;
 
@@ -130,7 +145,7 @@ export default function TradePanel({
         if (mode === 'sell') {
             setAmount((tokenBalance * percent / 100).toFixed(2));
         } else {
-            setAmount((userStxBalance * percent / 100).toFixed(2));
+            setAmount((stxBalance * percent / 100).toFixed(2));
         }
     };
 
@@ -166,8 +181,8 @@ export default function TradePanel({
                     {mode === 'buy' ? 'STX Balance' : `${token.symbol} Balance`}
                 </span>
                 <span className="text-[11px] text-white font-bold terminal-text">
-                    {mode === 'buy'
-                        ? `${userStxBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })} STX`
+                    {balanceLoading ? '...' : mode === 'buy'
+                        ? `${stxBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })} STX`
                         : `${tokenBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${token.symbol}`
                     }
                 </span>
