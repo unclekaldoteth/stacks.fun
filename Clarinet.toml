@@ -17,9 +17,16 @@ path = "contracts/launchpad-factory.clar"
 clarity_version = 3
 epoch = 3.0
 
-# Bonding Curve
+# Bonding Curve (v1 - deprecated)
 [contracts.bonding-curve]
 path = "contracts/bonding-curve.clar"
+clarity_version = 3
+epoch = 3.0
+depends_on = ["sip-010-trait"]
+
+# Bonding Curve V2 (improved tokenomics)
+[contracts.bonding-curve-v2]
+path = "contracts/bonding-curve-v2.clar"
 clarity_version = 3
 epoch = 3.0
 depends_on = ["sip-010-trait"]

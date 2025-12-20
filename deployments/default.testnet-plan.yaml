@@ -30,6 +30,13 @@ plan:
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
+            contract-name: bonding-curve-v2
+            expected-sender: ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM
+            cost: 101640
+            path: contracts/bonding-curve-v2.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
             contract-name: launchpad-factory
             expected-sender: ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM
             cost: 36560

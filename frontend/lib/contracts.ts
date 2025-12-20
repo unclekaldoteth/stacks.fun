@@ -10,7 +10,7 @@ const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFX
 export const CONTRACTS = {
     bondingCurve: {
         address: DEPLOYER,
-        name: 'bonding-curve',
+        name: 'bonding-curve-v2', // V2 with improved tokenomics
     },
     launchpadFactory: {
         address: DEPLOYER,
