@@ -10,7 +10,11 @@ const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFX
 export const CONTRACTS = {
     bondingCurve: {
         address: DEPLOYER,
-        name: 'bonding-curve-v2', // V2 with improved tokenomics
+        name: 'bonding-curve-v2', // V2 with improved tokenomics for NEW tokens
+    },
+    bondingCurveV1: {
+        address: DEPLOYER,
+        name: 'bonding-curve', // V1 for backward compatibility with existing tokens
     },
     launchpadFactory: {
         address: DEPLOYER,
@@ -350,57 +354,68 @@ export async function getTokenInfo(tokenId: number): Promise<unknown | null> {
 export async function getUserBalance(tokenContract: string, userAddress: string): Promise<number> {
     try {
         const tx = await getTransactionHelpers();
-        const contractId = getContractId('bondingCurve');
         const [tokenAddress, tokenName] = tokenContract.split('.');
 
         const tokenPrincipalHex = tx.cvToHex(tx.contractPrincipalCV(tokenAddress, tokenName));
         const userPrincipalHex = tx.cvToHex(tx.standardPrincipalCV(userAddress));
 
-        const response = await fetch(
-            `${HIRO_API}/v2/contracts/call-read/${contractId.replace('.', '/')}/get-user-balance`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    sender: DEPLOYER,
-                    arguments: [tokenPrincipalHex, userPrincipalHex],
-                }),
-            }
-        );
+        // Helper to fetch balance from a specific bonding curve contract
+        const fetchBalanceFrom = async (contractName: string): Promise<number> => {
+            try {
+                const response = await fetch(
+                    `${HIRO_API}/v2/contracts/call-read/${DEPLOYER}/${contractName}/get-user-balance`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            sender: DEPLOYER,
+                            arguments: [tokenPrincipalHex, userPrincipalHex],
+                        }),
+                    }
+                );
 
-        if (!response.ok) return 0;
-        const data = await response.json();
+                if (!response.ok) return 0;
+                const data = await response.json();
 
-        // Response is hex-encoded Clarity value
-        // Example: { okay: true, result: '0x0c...' }
-        if (data.okay && data.result) {
-            // Parse the hex response using hexToCV and cvToValue
-            const { hexToCV, cvToValue } = tx;
-            const cv = hexToCV(data.result);
-            const value = cvToValue(cv);
+                if (data.okay && data.result) {
+                    const { hexToCV, cvToValue } = tx;
+                    const cv = hexToCV(data.result);
+                    const value = cvToValue(cv);
 
-            // cvToValue returns: { balance: { type: 'uint', value: '1000199974' } }
-            // We need to extract the value string
-            if (value && typeof value === 'object' && 'balance' in value) {
-                const balanceObj = value.balance as { type?: string; value?: string } | bigint | number | string;
-                let balanceRaw: number;
+                    if (value && typeof value === 'object' && 'balance' in value) {
+                        const balanceObj = value.balance as { type?: string; value?: string } | bigint | number | string;
+                        let balanceRaw: number;
 
-                if (typeof balanceObj === 'object' && balanceObj !== null && 'value' in balanceObj) {
-                    // Handle { type: 'uint', value: '123' } format
-                    balanceRaw = parseInt(balanceObj.value as string, 10);
-                } else if (typeof balanceObj === 'bigint') {
-                    balanceRaw = Number(balanceObj);
-                } else {
-                    balanceRaw = parseInt(String(balanceObj), 10);
+                        if (typeof balanceObj === 'object' && balanceObj !== null && 'value' in balanceObj) {
+                            balanceRaw = parseInt(balanceObj.value as string, 10);
+                        } else if (typeof balanceObj === 'bigint') {
+                            balanceRaw = Number(balanceObj);
+                        } else {
+                            balanceRaw = parseInt(String(balanceObj), 10);
+                        }
+
+                        return balanceRaw / 100_000_000;
+                    }
                 }
-
-                // Balance is in 8-decimal format
-                return balanceRaw / 100_000_000;
+                return 0;
+            } catch {
+                return 0;
             }
-        }
-        return 0;
+        };
+
+        // Check BOTH v1 and v2 contracts for balance (backward compatibility)
+        const [balanceV1, balanceV2] = await Promise.all([
+            fetchBalanceFrom('bonding-curve'),      // V1
+            fetchBalanceFrom('bonding-curve-v2'),   // V2
+        ]);
+
+        console.log(`Balance check - V1: ${balanceV1}, V2: ${balanceV2}`);
+
+        // Return the higher balance (user might have tokens on either version)
+        return Math.max(balanceV1, balanceV2);
     } catch (error) {
         console.error('Error fetching user balance:', error);
         return 0;
     }
 }
+
