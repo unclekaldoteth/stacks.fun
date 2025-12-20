@@ -424,6 +424,64 @@ app.get('/api/tokens/:identifier', async (req, res) => {
     }
 });
 
+// Update token metadata (social links) - only creator can update
+app.patch('/api/tokens/:identifier', async (req, res) => {
+    try {
+        const { identifier } = req.params;
+        const { twitter, telegram, website, creator } = req.body;
+
+        if (!creator) {
+            return res.status(400).json({ error: 'Creator address required for verification' });
+        }
+
+        if (supabase) {
+            // Find the token
+            let token = null;
+
+            // Try exact symbol match
+            const { data } = await supabase.from('tokens').select('*').eq('symbol', identifier).single();
+            token = data;
+
+            if (!token) {
+                const { data: data2 } = await supabase.from('tokens').select('*').eq('symbol', identifier.toLowerCase()).single();
+                token = data2;
+            }
+
+            if (!token) {
+                return res.status(404).json({ error: 'Token not found' });
+            }
+
+            // Verify creator
+            if (token.creator.toLowerCase() !== creator.toLowerCase()) {
+                return res.status(403).json({ error: 'Only the token creator can update metadata' });
+            }
+
+            // Update allowed fields
+            const updates = {};
+            if (twitter !== undefined) updates.twitter = twitter;
+            if (telegram !== undefined) updates.telegram = telegram;
+            if (website !== undefined) updates.website = website;
+            updates.updated_at = new Date().toISOString();
+
+            const { error: updateError } = await supabase
+                .from('tokens')
+                .update(updates)
+                .eq('id', token.id);
+
+            if (updateError) throw updateError;
+
+            // Return updated token
+            const { data: updatedToken } = await supabase.from('tokens').select('*').eq('id', token.id).single();
+            res.json(updatedToken);
+        } else {
+            res.status(501).json({ error: 'Database not configured' });
+        }
+    } catch (error) {
+        console.error('Error updating token:', error);
+        res.status(500).json({ error: 'Failed to update token' });
+    }
+});
+
 // ============================================
 // API Routes - Trades
 // ============================================

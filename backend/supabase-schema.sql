@@ -26,6 +26,11 @@ CREATE TABLE tokens (
     image_uri TEXT,
     description TEXT,
     
+    -- Social links (off-chain, updatable by creator)
+    twitter VARCHAR(255),
+    telegram VARCHAR(255),
+    website VARCHAR(255),
+    
     -- Bonding curve state
     tokens_sold DECIMAL(38, 8) NOT NULL DEFAULT 0,
     stx_reserve DECIMAL(38, 8) NOT NULL DEFAULT 0,
