@@ -237,11 +237,14 @@ async function syncTokensFromBlockchain() {
 
             if (supabase) {
                 // First check if token already exists
+                console.log(`🔍 Checking if ${symbol} exists...`);
                 const { data: existing, error: checkError } = await supabase
                     .from('tokens')
-                    .select('id')
+                    .select('id, symbol')
                     .eq('symbol', symbol)
                     .maybeSingle();
+
+                console.log(`   Result for ${symbol}: existing=${JSON.stringify(existing)}, error=${checkError?.message || 'none'}`);
 
                 if (checkError) {
                     console.error(`Error checking ${symbol}:`, checkError.message);
@@ -250,6 +253,7 @@ async function syncTokensFromBlockchain() {
 
                 if (!existing) {
                     // Insert new token
+                    console.log(`   Inserting new token: ${symbol}`);
                     const { error } = await supabase
                         .from('tokens')
                         .insert(tokenData);
