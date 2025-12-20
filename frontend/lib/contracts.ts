@@ -345,3 +345,44 @@ export async function getTokenInfo(tokenId: number): Promise<unknown | null> {
         return null;
     }
 }
+
+// Get user's token balance from bonding curve
+export async function getUserBalance(tokenContract: string, userAddress: string): Promise<number> {
+    try {
+        const tx = await getTransactionHelpers();
+        const contractId = getContractId('bondingCurve');
+        const [tokenAddress, tokenName] = tokenContract.split('.');
+
+        const tokenPrincipalHex = tx.cvToHex(tx.contractPrincipalCV(tokenAddress, tokenName));
+        const userPrincipalHex = tx.cvToHex(tx.standardPrincipalCV(userAddress));
+
+        const response = await fetch(
+            `${HIRO_API}/v2/contracts/call-read/${contractId.replace('.', '/')}/get-user-balance`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sender: DEPLOYER,
+                    arguments: [tokenPrincipalHex, userPrincipalHex],
+                }),
+            }
+        );
+
+        if (!response.ok) return 0;
+        const data = await response.json();
+
+        // Parse Clarity response: (tuple (balance uint))
+        // Result looks like: "(tuple (balance u12345))"
+        if (data.result) {
+            const match = data.result.match(/balance u(\d+)/);
+            if (match) {
+                // Balance is in 8-decimal format
+                return parseInt(match[1]) / 100_000_000;
+            }
+        }
+        return 0;
+    } catch (error) {
+        console.error('Error fetching user balance:', error);
+        return 0;
+    }
+}

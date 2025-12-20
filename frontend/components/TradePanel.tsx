@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { calculateBuyAmount, calculateSellReturn, Token } from '@/lib/api';
 import { buyTokens, sellTokens } from '@/lib/contracts';
 import { getExplorerTxUrl } from '@/lib/stacks';
+import { useWallet } from '@/components/WalletProvider';
 
 interface TradePanelProps {
     token: Token;
-    userBalance?: number;
-    userStxBalance?: number;
     onTradeComplete?: () => void;
 }
 
@@ -16,16 +15,48 @@ type TradeMode = 'buy' | 'sell';
 
 export default function TradePanel({
     token,
-    userBalance = 0,
-    userStxBalance = 0,
     onTradeComplete
 }: TradePanelProps) {
+    const { balance: stxBalance, isConnected, address } = useWallet();
     const [mode, setMode] = useState<TradeMode>('buy');
     const [amount, setAmount] = useState<string>('');
     const [slippage, setSlippage] = useState<number>(1);
     const [isLoading, setIsLoading] = useState(false);
     const [showSlippage, setShowSlippage] = useState(false);
     const [txId, setTxId] = useState<string | null>(null);
+    const [tokenBalance, setTokenBalance] = useState<number>(0);
+
+    // Parse STX balance from wallet (format: "499.123456 STX")
+    const userStxBalance = useMemo(() => {
+        if (!stxBalance) return 0;
+        const match = stxBalance.match(/^([\d.]+)/);
+        return match ? parseFloat(match[1]) : 0;
+    }, [stxBalance]);
+
+    // Fetch user's token balance from the bonding curve contract
+    useEffect(() => {
+        async function fetchTokenBalance() {
+            if (!address) {
+                setTokenBalance(0);
+                return;
+            }
+
+            try {
+                const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
+                const tokenContract = `${DEPLOYER}.launchpad-token`;
+
+                // Import the getUserBalance function from contracts
+                const { getUserBalance } = await import('@/lib/contracts');
+                const balance = await getUserBalance(tokenContract, address);
+                setTokenBalance(balance);
+            } catch (error) {
+                console.error('Error fetching token balance:', error);
+                setTokenBalance(0);
+            }
+        }
+
+        fetchTokenBalance();
+    }, [address, txId]); // Refresh after trade
 
     const numAmount = parseFloat(amount) || 0;
 
@@ -42,21 +73,23 @@ export default function TradePanel({
     const handleTrade = async () => {
         if (!numAmount || token.is_graduated) return;
 
+        if (!isConnected) {
+            alert('Please connect your wallet to trade.');
+            return;
+        }
+
         setIsLoading(true);
         setTxId(null);
 
         try {
-            // Use the bonding-curve contract with the launchpad-token contract
-            // All tokens share the same bonding-curve, identified by the launchpad-token contract
             const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
             const tokenContractId = `${DEPLOYER}.launchpad-token`;
 
             if (mode === 'buy') {
-                // Buy tokens with STX
                 await buyTokens(
                     tokenContractId,
-                    numAmount, // STX amount
-                    minOutput, // Minimum tokens to receive
+                    numAmount,
+                    minOutput,
                     {
                         onFinish: (data) => {
                             setTxId(data.txId);
@@ -69,11 +102,10 @@ export default function TradePanel({
                     }
                 );
             } else {
-                // Sell tokens for STX
                 await sellTokens(
                     tokenContractId,
-                    numAmount, // Token amount
-                    minOutput, // Minimum STX to receive
+                    numAmount,
+                    minOutput,
                     {
                         onFinish: (data) => {
                             setTxId(data.txId);
@@ -94,11 +126,15 @@ export default function TradePanel({
         }
     };
 
-    const setQuickAmount = (val: string) => {
-        setAmount(val);
+    const setPercentage = (percent: number) => {
+        if (mode === 'sell') {
+            setAmount((tokenBalance * percent / 100).toFixed(2));
+        } else {
+            setAmount((userStxBalance * percent / 100).toFixed(2));
+        }
     };
 
-    const isDisabled = !numAmount || isLoading || token.is_graduated;
+    const isDisabled = !numAmount || isLoading || token.is_graduated || !isConnected;
 
     return (
         <div className="pump-panel bg-black border-[var(--border-bright)]">
@@ -122,6 +158,19 @@ export default function TradePanel({
                 >
                     SELL
                 </button>
+            </div>
+
+            {/* Balance Display */}
+            <div className="flex justify-between items-center mb-3 px-1">
+                <span className="text-[10px] text-[var(--text-muted)] uppercase font-bold">
+                    {mode === 'buy' ? 'STX Balance' : `${token.symbol} Balance`}
+                </span>
+                <span className="text-[11px] text-white font-bold terminal-text">
+                    {mode === 'buy'
+                        ? `${userStxBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })} STX`
+                        : `${tokenBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${token.symbol}`
+                    }
+                </span>
             </div>
 
             {/* Input Container */}
@@ -169,17 +218,17 @@ export default function TradePanel({
                         ['10', '50', '100', '500'].map(v => (
                             <button
                                 key={v}
-                                onClick={() => setQuickAmount(v)}
+                                onClick={() => setAmount(v)}
                                 className="flex-1 bg-zinc-900 hover:bg-zinc-800 text-[10px] py-2 rounded font-bold border border-[var(--border)]"
                             >
                                 {v} STX
                             </button>
                         ))
                     ) : (
-                        ['25', '50', '75', '100'].map(v => (
+                        [25, 50, 75, 100].map(v => (
                             <button
                                 key={v}
-                                onClick={() => setQuickAmount((userBalance * parseInt(v) / 100).toString())}
+                                onClick={() => setPercentage(v)}
                                 className="flex-1 bg-zinc-900 hover:bg-zinc-800 text-[10px] py-2 rounded font-bold border border-[var(--border)]"
                             >
                                 {v}%
@@ -214,7 +263,12 @@ export default function TradePanel({
                         : 'bg-[var(--accent-red)] text-black border-red-700 hover:bg-red-400'
                     }`}
             >
-                {isLoading ? 'EXECUTING...' : `[PLACE ${mode === 'buy' ? 'BUY' : 'SELL'} ORDER]`}
+                {!isConnected
+                    ? '[CONNECT WALLET]'
+                    : isLoading
+                        ? 'EXECUTING...'
+                        : `[PLACE ${mode === 'buy' ? 'BUY' : 'SELL'} ORDER]`
+                }
             </button>
 
             {/* Footer Tip */}
@@ -225,3 +279,4 @@ export default function TradePanel({
         </div>
     );
 }
+
