@@ -10,8 +10,54 @@ export default function HowItWorksPage() {
             How <span className="text-[var(--accent-green)]">Stacks.fun</span> Works
           </h1>
           <p className="text-[var(--text-secondary)] text-lg">
-            Launch tokens on Stacks with bonding curves, secured by Bitcoin
+            Launch tokens on Stacks with bonding curves, powered by <span className="text-green-400">USDCx</span>
           </p>
+        </div>
+
+        {/* Get USDCx Banner */}
+        <div className="pump-panel bg-gradient-to-r from-green-900/30 to-blue-900/30 border-green-500/50 mb-8">
+          <h2 className="text-xl font-black uppercase mb-4 text-center text-green-400">
+            💵 Get Testnet USDCx
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <span className="text-green-400 font-black">1.</span>
+              <div>
+                <p className="text-white font-bold">Get Sepolia ETH</p>
+                <p className="text-[var(--text-muted)] text-sm">
+                  Go to <a href="https://sepoliafaucet.com" target="_blank" className="text-blue-400 underline">sepoliafaucet.com</a> or{' '}
+                  <a href="https://faucet.quicknode.com/ethereum/sepolia" target="_blank" className="text-blue-400 underline">Quicknode Faucet</a>
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-green-400 font-black">2.</span>
+              <div>
+                <p className="text-white font-bold">Get Sepolia USDC</p>
+                <p className="text-[var(--text-muted)] text-sm">
+                  Mint USDC from <a href="https://faucet.circle.com" target="_blank" className="text-blue-400 underline">Circle USDC Faucet</a> (Sepolia)
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-green-400 font-black">3.</span>
+              <div>
+                <p className="text-white font-bold">Bridge to Stacks Testnet</p>
+                <p className="text-[var(--text-muted)] text-sm">
+                  Use <a href="https://usdcx.stacks.co" target="_blank" className="text-blue-400 underline">usdcx.stacks.co</a> to bridge USDC from Sepolia → Stacks Testnet
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-green-400 font-black">4.</span>
+              <div>
+                <p className="text-white font-bold">Trade with USDCx! 🎉</p>
+                <p className="text-[var(--text-muted)] text-sm">
+                  Your USDCx will appear in your Hiro Wallet. Now you can trade on stacks.fun!
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Steps */}
@@ -31,7 +77,7 @@ export default function HowItWorksPage() {
                 <ul className="text-sm text-[var(--text-muted)] space-y-1">
                   <li>• Token follows SIP-010 standard</li>
                   <li>• Automatic liquidity via bonding curve</li>
-                  <li>• Creator receives 2% of all trades</li>
+                  <li>• Creator receives 1% of all trades</li>
                 </ul>
               </div>
             </div>
@@ -44,14 +90,14 @@ export default function HowItWorksPage() {
                 2
               </div>
               <div>
-                <h2 className="text-xl font-black uppercase mb-2">Trade on Bonding Curve</h2>
+                <h2 className="text-xl font-black uppercase mb-2">Trade with USDCx</h2>
                 <p className="text-[var(--text-secondary)] mb-4">
-                  Buy and sell tokens directly through the bonding curve smart contract.
+                  Buy and sell tokens using <span className="text-green-400 font-bold">USDCx</span> (bridged USDC).
                   Price increases as more tokens are bought.
                 </p>
                 <ul className="text-sm text-[var(--text-muted)] space-y-1">
+                  <li>• Pay with USDCx (1:1 with USDC)</li>
                   <li>• Instant trades, no order books</li>
-                  <li>• Price follows mathematical curve: P = k × supply²</li>
                   <li>• Always liquidity available for sells</li>
                 </ul>
               </div>
@@ -67,7 +113,7 @@ export default function HowItWorksPage() {
               <div>
                 <h2 className="text-xl font-black uppercase mb-2">Graduate to ALEX DEX</h2>
                 <p className="text-[var(--text-secondary)] mb-4">
-                  When market cap reaches 100,000 STX, the token graduates!
+                  When market cap reaches $69,000, the token graduates!
                   Liquidity is automatically migrated to ALEX DEX.
                 </p>
                 <ul className="text-sm text-[var(--text-muted)] space-y-1">
@@ -87,15 +133,15 @@ export default function HowItWorksPage() {
           </h2>
           <div className="grid md:grid-cols-3 gap-6 text-center">
             <div>
-              <div className="text-3xl font-black text-[var(--accent-green)]">0.01 STX</div>
+              <div className="text-3xl font-black text-[var(--accent-green)]">$0.0001</div>
               <div className="text-sm text-[var(--text-muted)]">Starting Price</div>
             </div>
             <div>
-              <div className="text-3xl font-black text-[var(--accent-yellow)]">1B</div>
-              <div className="text-sm text-[var(--text-muted)]">Total Supply</div>
+              <div className="text-3xl font-black text-[var(--accent-yellow)]">10,000</div>
+              <div className="text-sm text-[var(--text-muted)]">Tokens per $1 USDC</div>
             </div>
             <div>
-              <div className="text-3xl font-black text-[var(--accent-orange)]">100K STX</div>
+              <div className="text-3xl font-black text-[var(--accent-orange)]">$69K</div>
               <div className="text-sm text-[var(--text-muted)]">Graduation Target</div>
             </div>
           </div>
@@ -106,12 +152,36 @@ export default function HowItWorksPage() {
           <h2 className="text-xl font-black uppercase mb-4 text-center">💰 Fee Structure</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="text-center p-4 bg-zinc-900 rounded-lg">
-              <div className="text-2xl font-black text-[var(--accent-green)]">2%</div>
+              <div className="text-2xl font-black text-[var(--accent-green)]">1%</div>
               <div className="text-sm text-[var(--text-muted)]">Platform Fee</div>
             </div>
             <div className="text-center p-4 bg-zinc-900 rounded-lg">
-              <div className="text-2xl font-black text-[var(--accent-yellow)]">2%</div>
+              <div className="text-2xl font-black text-[var(--accent-yellow)]">1%</div>
               <div className="text-sm text-[var(--text-muted)]">Creator Fee</div>
+            </div>
+          </div>
+        </div>
+
+        {/* USDCx Info */}
+        <div className="mt-8 pump-panel bg-green-900/20 border-green-500/30">
+          <h2 className="text-xl font-black uppercase mb-4 text-center text-green-400">
+            🔗 About USDCx
+          </h2>
+          <p className="text-[var(--text-secondary)] text-center mb-4">
+            USDCx is bridged USDC on Stacks, backed 1:1 by native USDC on Ethereum.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4 text-sm">
+            <div className="bg-zinc-900 p-3 rounded">
+              <div className="text-green-400 font-bold">Testnet Contract</div>
+              <code className="text-xs text-[var(--text-muted)] break-all">
+                ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx
+              </code>
+            </div>
+            <div className="bg-zinc-900 p-3 rounded">
+              <div className="text-green-400 font-bold">Mainnet Contract</div>
+              <code className="text-xs text-[var(--text-muted)] break-all">
+                SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx
+              </code>
             </div>
           </div>
         </div>
@@ -129,3 +199,4 @@ export default function HowItWorksPage() {
     </main>
   );
 }
+
