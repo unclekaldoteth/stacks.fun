@@ -10,11 +10,15 @@ const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFX
 export const CONTRACTS = {
     bondingCurve: {
         address: DEPLOYER,
-        name: 'bonding-curve-v2', // V2 with improved tokenomics for NEW tokens
+        name: 'bonding-curve-usdcx', // USDCx version - USDC payments
+    },
+    bondingCurveV2: {
+        address: DEPLOYER,
+        name: 'bonding-curve-v2', // V2 with improved tokenomics (STX)
     },
     bondingCurveV1: {
         address: DEPLOYER,
-        name: 'bonding-curve', // V1 for backward compatibility with existing tokens
+        name: 'bonding-curve', // V1 for backward compatibility (STX)
     },
     launchpadFactory: {
         address: DEPLOYER,
@@ -31,6 +35,11 @@ export const CONTRACTS = {
     sip010Trait: {
         address: DEPLOYER,
         name: 'sip-010-trait',
+    },
+    // USDCx token contract (testnet)
+    usdcx: {
+        address: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
+        name: 'usdcx',
     },
 } as const;
 

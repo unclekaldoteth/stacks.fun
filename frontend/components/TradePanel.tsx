@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { calculateBuyAmount, calculateSellReturn, Token } from '@/lib/api';
-import { buyTokens, sellTokens } from '@/lib/contracts';
+import { buyTokens, sellTokens, CONTRACTS } from '@/lib/contracts';
 import { useWallet } from '@/components/WalletProvider';
 
 interface TradePanelProps {
@@ -15,6 +15,9 @@ type TradeMode = 'buy' | 'sell';
 const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
 const STACKS_API = process.env.NEXT_PUBLIC_STACKS_API || 'https://api.testnet.hiro.so';
 
+// USDCx contract on testnet
+const USDCX_CONTRACT = `${CONTRACTS.usdcx.address}.${CONTRACTS.usdcx.name}`;
+
 export default function TradePanel({
     token,
     onTradeComplete
@@ -26,14 +29,14 @@ export default function TradePanel({
     const [isLoading, setIsLoading] = useState(false);
     const [showSlippage, setShowSlippage] = useState(false);
     const [txId, setTxId] = useState<string | null>(null);
-    const [stxBalance, setStxBalance] = useState<number>(0);
+    const [usdcBalance, setUsdcBalance] = useState<number>(0);
     const [tokenBalance, setTokenBalance] = useState<number>(0);
     const [balanceLoading, setBalanceLoading] = useState(false);
 
-    // Fetch both STX and token balances
+    // Fetch both USDCx and token balances
     const fetchBalances = useCallback(async () => {
         if (!address) {
-            setStxBalance(0);
+            setUsdcBalance(0);
             setTokenBalance(0);
             return;
         }
@@ -41,16 +44,37 @@ export default function TradePanel({
         setBalanceLoading(true);
 
         try {
-            // 1. Fetch STX balance from Stacks API
-            const stxResponse = await fetch(`${STACKS_API}/extended/v1/address/${address}/stx`);
-            if (stxResponse.ok) {
-                const stxData = await stxResponse.json();
-                // balance is in micro-STX, convert to STX
-                const balanceInStx = parseInt(stxData.balance || '0') / 1_000_000;
-                setStxBalance(balanceInStx);
+            const tx = await import('@stacks/transactions');
+
+            // 1. Fetch USDCx balance from contract
+            const usdcxArgs = [tx.cvToHex(tx.standardPrincipalCV(address))];
+            const usdcResponse = await fetch(
+                `${STACKS_API}/v2/contracts/call-read/${CONTRACTS.usdcx.address}/${CONTRACTS.usdcx.name}/get-balance`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sender: address,
+                        arguments: usdcxArgs,
+                    }),
+                }
+            );
+
+            if (usdcResponse.ok) {
+                const usdcData = await usdcResponse.json();
+                if (usdcData.okay && usdcData.result) {
+                    const cv = tx.hexToCV(usdcData.result);
+                    const value = tx.cvToValue(cv);
+                    // USDCx has 6 decimals
+                    const balance = typeof value === 'object' && 'value' in value
+                        ? parseInt(String(value.value), 10) / 1_000_000
+                        : 0;
+                    setUsdcBalance(balance);
+                    console.log('USDCx balance:', balance);
+                }
             }
 
-            // 2. Fetch token balance from bonding-curve contract using proper encoding
+            // 2. Fetch token balance from bonding-curve contract
             try {
                 const { getUserBalance } = await import('@/lib/contracts');
                 const tokenContract = `${DEPLOYER}.launchpad-token`;
@@ -165,7 +189,7 @@ export default function TradePanel({
         if (mode === 'sell') {
             setAmount((tokenBalance * percent / 100).toFixed(2));
         } else {
-            setAmount((stxBalance * percent / 100).toFixed(2));
+            setAmount((usdcBalance * percent / 100).toFixed(2));
         }
     };
 
@@ -198,11 +222,11 @@ export default function TradePanel({
             {/* Balance Display */}
             <div className="flex justify-between items-center mb-3 px-1">
                 <span className="text-[10px] text-[var(--text-muted)] uppercase font-bold">
-                    {mode === 'buy' ? 'STX Balance' : `${token.symbol} Balance`}
+                    {mode === 'buy' ? 'USDC Balance' : `${token.symbol} Balance`}
                 </span>
                 <span className="text-[11px] text-white font-bold terminal-text">
                     {balanceLoading ? '...' : mode === 'buy'
-                        ? `${stxBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })} STX`
+                        ? `${usdcBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC`
                         : `${tokenBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${token.symbol}`
                     }
                 </span>

@@ -31,6 +31,13 @@ clarity_version = 3
 epoch = 3.0
 depends_on = ["sip-010-trait"]
 
+# Bonding Curve USDCx (USDC payments)
+[contracts.bonding-curve-usdcx]
+path = "contracts/bonding-curve-usdcx.clar"
+clarity_version = 3
+epoch = 3.0
+depends_on = ["sip-010-trait"]
+
 # ALEX Graduation
 [contracts.alex-graduation]
 path = "contracts/alex-graduation.clar"

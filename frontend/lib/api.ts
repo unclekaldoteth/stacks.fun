@@ -68,65 +68,64 @@ export interface LeaderboardEntry {
 // Must match the smart contract math!
 // ============================================
 
-// Contract constants (from bonding-curve-v2.clar):
-// INITIAL-PRICE = u10000 (in 8-decimal fixed point) - 100x cheaper
-// SLOPE = u10000 - 100x more aggressive
-// ONE-8 = u100000000
+// Contract constants (from bonding-curve-usdcx.clar):
+// INITIAL-PRICE = u100 (in 6-decimal format) = $0.0001/token
+// SLOPE = u100
+// ONE-6 = u1000000 (for USDC - 6 decimals)
+// ONE-8 = u100000000 (for tokens - 8 decimals)
 // 
-// Contract formula: tokens = (stx_micro * ONE_8) / price
+// Contract formula: tokens = (usdc_amount * ONE_8) / price
 // 
 // At launch (0 tokens sold):
-// price = 10,000 (8-decimal)
-// tokens = (1 STX * 1,000,000 * 100,000,000) / 10,000
-//        = 10,000,000 (8-decimal) = 100 tokens per STX
-// 
-// Effective price at launch: ~0.01 STX per token
+// price = 100 (6-decimal) = $0.0001
+// tokens = (1 USDC * 1,000,000 * 100,000,000) / 100
+//        = 100,000,000,000,000 / 100 = 1,000,000,000,000
+//        = 10,000 tokens per USDC at launch
 
-const INITIAL_PRICE_8DEC = 10000; // u10000 from v2 contract
-const SLOPE_8DEC = 10000; // u10000 from v2 contract (100x more aggressive)
-const ONE_8 = 100000000; // u100000000 from contract
-const GRADUATION_THRESHOLD = 69000; // ~69,000 STX market cap
+const INITIAL_PRICE_6DEC = 100; // u100 from usdcx contract = $0.0001/token
+const SLOPE = 100; // Price increase per token
+const ONE_6 = 1000000; // 1.0 in 6-decimal (USDC)
+const ONE_8 = 100000000; // 1.0 in 8-decimal (tokens)
+const GRADUATION_THRESHOLD = 69000; // $69,000 USDC market cap
 
-// Get current price in STX per token
+// Get current price in USDC per token
 export function calculatePrice(tokensSold: number): number {
-    // Contract: current-price = INITIAL-PRICE + (tokens-sold * SLOPE)
-    // tokens-sold is in 8-decimal format
+    // Contract: current-price = INITIAL-PRICE + (tokens-sold * SLOPE / ONE_8)
     const tokensSold8Dec = tokensSold * ONE_8;
-    const price8Dec = INITIAL_PRICE_8DEC + (tokensSold8Dec * SLOPE_8DEC / ONE_8);
+    const price6Dec = INITIAL_PRICE_6DEC + (tokensSold8Dec * SLOPE / ONE_8);
 
-    // Convert from 8-decimal fixed point to STX per token
-    // The contract math: tokens = (stx_micro * ONE_8) / price
-    // Rearranging: stx_per_token = price / ONE_8 * (1_000_000 / ONE_8)
-    // Simplified: stx_per_token = price / 100
-    return price8Dec / 100;
+    // Convert from 6-decimal fixed point to USDC per token
+    // price6Dec / ONE_6 = USDC per token
+    return price6Dec / ONE_6;
 }
 
-// Calculate tokens received for STX input
-export function calculateBuyAmount(stxAmount: number, tokensSold: number): number {
-    // Match contract: tokens = (stx_micro * ONE_8) / price
-    const stxMicro = stxAmount * 1000000;
+// Calculate tokens received for USDC input
+export function calculateBuyAmount(usdcAmount: number, tokensSold: number): number {
+    // Match contract: tokens = (usdc_amount * ONE_8) / price
+    const usdcMicro = usdcAmount * ONE_6; // Convert to 6-decimal
     const tokensSold8Dec = tokensSold * ONE_8;
-    const price8Dec = INITIAL_PRICE_8DEC + (tokensSold8Dec * SLOPE_8DEC / ONE_8);
+    const price6Dec = INITIAL_PRICE_6DEC + (tokensSold8Dec * SLOPE / ONE_8);
 
-    const tokens8Dec = (stxMicro * ONE_8) / price8Dec;
+    const tokens8Dec = (usdcMicro * ONE_8) / price6Dec;
     return tokens8Dec / ONE_8; // Convert back to token units
 }
 
-// Calculate STX received for selling tokens
+// Calculate USDC received for selling tokens
 export function calculateSellReturn(tokenAmount: number, tokensSold: number): number {
     // Reverse of buy calculation with 2% fee
     const tokens8Dec = tokenAmount * ONE_8;
     const tokensSold8Dec = tokensSold * ONE_8;
-    const price8Dec = INITIAL_PRICE_8DEC + (tokensSold8Dec * SLOPE_8DEC / ONE_8);
+    const price6Dec = INITIAL_PRICE_6DEC + (tokensSold8Dec * SLOPE / ONE_8);
 
-    const stxMicro = (tokens8Dec * price8Dec) / ONE_8;
-    const stxAmount = stxMicro / 1000000;
-    return stxAmount * 0.98; // 2% fee
+    const usdcMicro = (tokens8Dec * price6Dec) / ONE_8;
+    const usdcAmount = usdcMicro / ONE_6;
+    return usdcAmount * 0.98; // 2% fee
 }
 
 export function getProgressToGraduation(marketCap: number): number {
     return Math.min((marketCap / GRADUATION_THRESHOLD) * 100, 100);
 }
+
 
 export function generateBondingCurveData(tokensSold: number, points: number = 50): { sold: number; price: number }[] {
     const data = [];
