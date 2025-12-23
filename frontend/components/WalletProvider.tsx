@@ -104,8 +104,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
     }, [address]);
 
-    // Connect wallet
-    const connect = useCallback(async () => {
+    // Connect wallet using @stacks/connect v8 connect() method
+    const connectWallet = useCallback(async () => {
         setIsConnecting(true);
 
         try {
@@ -116,47 +116,57 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
                 return;
             }
 
-            // In @stacks/connect v8, use 'authenticate' instead of deprecated 'showConnect'
-            const { authenticate, AppConfig, UserSession, getStxAddress, isConnected: checkConnected } = stacksConnect;
+            // In @stacks/connect v8, use 'connect' for wallet connection
+            // 'authenticate' is deprecated - 'connect' properly supports walletConnectProjectId
+            const { connect: stacksConnectFn } = stacksConnect;
 
-            if (!userSessionInstance) {
-                const appConfig = new AppConfig(['store_write', 'publish_data']);
-                userSessionInstance = new UserSession({ appConfig });
+            // Get WalletConnect project ID for mobile wallet support
+            const walletConnectId = getWalletConnectProjectId();
+
+            // Build connection options
+            const connectOptions: Record<string, unknown> = {
+                appDetails: getAppDetails(),
+            };
+
+            // Add WalletConnect project ID if configured
+            if (walletConnectId) {
+                connectOptions.walletConnectProjectId = walletConnectId;
+                console.log('WalletConnect enabled with project ID');
             }
 
-            // Use authenticate which is the v8 replacement for showConnect
-            // Include walletConnectProjectId to enable mobile wallet connection via QR code
-            const walletConnectId = getWalletConnectProjectId();
-            await authenticate({
-                appDetails: getAppDetails(),
-                ...(walletConnectId && { walletConnectProjectId: walletConnectId }),
-                onFinish: async () => {
-                    try {
-                        const data = userSessionInstance.loadUserData();
-                        const addr = isMainnet
-                            ? data.profile?.stxAddress?.mainnet
-                            : data.profile?.stxAddress?.testnet;
+            // Use connect() which shows the wallet selection modal with WalletConnect option
+            const response = await stacksConnectFn(connectOptions);
 
-                        setUserData(data);
-                        setAddress(addr || null);
-                        setIsConnected(true);
-                        setWalletType(detectWalletType());
+            if (response && response.addresses) {
+                // v8 returns addresses directly from connect()
+                const stxAddress = response.addresses.find(
+                    (addr: { symbol?: string }) => addr.symbol === 'STX'
+                );
 
-                        // Fetch balance after connect
-                        if (addr) {
-                            const bal = await getSTXBalance(addr);
-                            if (bal) setBalance(bal);
-                        }
-                    } catch (e) {
-                        console.error('Error loading user data:', e);
+                if (stxAddress) {
+                    const addr = stxAddress.address;
+                    setAddress(addr);
+                    setIsConnected(true);
+                    setWalletType(detectWalletType());
+
+                    // Store in userData for compatibility
+                    setUserData({
+                        profile: {
+                            stxAddress: {
+                                [isMainnet ? 'mainnet' : 'testnet']: addr,
+                            },
+                        },
+                    });
+
+                    // Fetch balance after connect
+                    if (addr) {
+                        const bal = await getSTXBalance(addr);
+                        if (bal) setBalance(bal);
                     }
-                    setIsConnecting(false);
-                },
-                onCancel: () => {
-                    setIsConnecting(false);
-                },
-                userSession: userSessionInstance,
-            });
+                }
+            }
+
+            setIsConnecting(false);
         } catch (error) {
             console.error('Error connecting wallet:', error);
             setIsConnecting(false);
@@ -189,7 +199,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         walletType,
         isWalletInstalled,
         isMainnet,
-        connect,
+        connect: connectWallet,
         disconnect,
         refreshBalance,
     };
