@@ -8,6 +8,7 @@ import {
     isWalletAvailable,
     getStacksConnect,
     getAppDetails,
+    getWalletConnectProjectId,
     type WalletType
 } from '@/lib/stacks';
 import { getSTXBalance } from '@/lib/hiro';
@@ -124,8 +125,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
             }
 
             // Use authenticate which is the v8 replacement for showConnect
+            // Include walletConnectProjectId to enable mobile wallet connection via QR code
+            const walletConnectId = getWalletConnectProjectId();
             await authenticate({
                 appDetails: getAppDetails(),
+                ...(walletConnectId && { walletConnectProjectId: walletConnectId }),
                 onFinish: async () => {
                     try {
                         const data = userSessionInstance.loadUserData();

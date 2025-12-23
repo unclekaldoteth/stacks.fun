@@ -8,6 +8,9 @@ export const isMainnet = networkName === 'mainnet';
 // App details for wallet connection
 export const appName = process.env.NEXT_PUBLIC_APP_NAME || 'StacksPad';
 
+// WalletConnect configuration
+export const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '';
+
 export function getAppDetails() {
     return {
         name: appName,
@@ -15,6 +18,11 @@ export function getAppDetails() {
             ? window.location.origin + (process.env.NEXT_PUBLIC_APP_ICON || '/favicon.ico')
             : '/favicon.ico',
     };
+}
+
+// Get WalletConnect project ID (returns undefined if not configured)
+export function getWalletConnectProjectId(): string | undefined {
+    return walletConnectProjectId || undefined;
 }
 
 // Format address for display (truncated)
