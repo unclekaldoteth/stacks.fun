@@ -71,9 +71,21 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             // Key configuration for WalletConnect to work:
             // - walletConnectProjectId: Required for WalletConnect option
             // - network: Required to avoid 'network in undefined' error
+            // - metadata: Set correct app URL for WalletConnect (not typed in @stacks/connect but passed through to AppKit)
+            const appUrl = typeof window !== 'undefined'
+                ? window.location.origin
+                : 'https://stacksfun.vercel.app';
+
             await connect({
                 walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
                 network: isMainnet ? 'mainnet' : 'testnet',
+                // @ts-expect-error - metadata is passed through to underlying WalletConnect/AppKit
+                metadata: {
+                    name: 'Stacks.fun',
+                    description: 'Token Launchpad on Stacks',
+                    url: appUrl,
+                    icons: [`${appUrl}/favicon.ico`],
+                },
             });
 
             // Get address from localStorage after connection
