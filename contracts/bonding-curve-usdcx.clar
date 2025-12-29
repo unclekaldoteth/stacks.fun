@@ -1,6 +1,11 @@
 ;; Bonding Curve Contract - USDCx Version
 ;; Implements linear bonding curve for token pricing with USDCx payments
 ;; Clarity 4 compatible with Stacks testnet/mainnet
+;;
+;; NOTE: This contract uses trait-based token passing for flexibility.
+;; The payment token (USDCx or any SIP-010 token) is passed as a parameter
+;; to buy/sell functions, allowing the same contract to work across all
+;; environments (local, testnet, mainnet) without code changes.
 
 ;; Traits
 (use-trait ft-trait .sip-010-trait.sip-010-trait)
@@ -15,15 +20,9 @@
 (define-constant ERR-NOT-GRADUATED (err u206))
 (define-constant ERR-ZERO-AMOUNT (err u207))
 (define-constant ERR-TRANSFER-FAILED (err u208))
+(define-constant ERR-INVALID-PAYMENT-TOKEN (err u209))
 
 (define-constant CONTRACT-OWNER tx-sender)
-
-;; USDCx contract addresses
-;; For local testing: use the mock contract
-;; Testnet: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx
-;; Mainnet: SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx  
-;; IMPORTANT: Change this to mainnet address before production deployment!
-(define-constant USDCX-CONTRACT 'SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx)
 ;; Fixed-point math constants
 ;; USDCx uses 6 decimals (like native USDC)
 ;; Tokens use 8 decimals
@@ -164,8 +163,9 @@
   )
 )
 
-;; Buy tokens with USDCx
-(define-public (buy (token principal) (usdc-amount uint) (min-tokens uint))
+;; Buy tokens with USDCx (or any SIP-010 payment token)
+;; payment-token: The SIP-010 token contract to use for payment (e.g., USDCx)
+(define-public (buy (token principal) (payment-token <ft-trait>) (usdc-amount uint) (min-tokens uint))
   (let
     (
       (pool (unwrap! (map-get? token-pools { token: token }) ERR-TOKEN-NOT-FOUND))
@@ -190,22 +190,22 @@
       ;; Slippage check
       (asserts! (>= tokens-to-buy min-tokens) ERR-SLIPPAGE-TOO-HIGH)
       
-      ;; Transfer USDCx from buyer to contract
-      (try! (contract-call? USDCX-CONTRACT transfer 
+      ;; Transfer payment token from buyer to contract
+      (try! (contract-call? payment-token transfer 
              usdc-amount 
              buyer 
              (as-contract tx-sender) 
              none))
       
       ;; Transfer platform fee
-      (try! (as-contract (contract-call? USDCX-CONTRACT transfer 
+      (try! (as-contract (contract-call? payment-token transfer 
              platform-fee-amount 
              tx-sender 
              (var-get platform-treasury) 
              none)))
       
       ;; Transfer creator fee
-      (try! (as-contract (contract-call? USDCX-CONTRACT transfer 
+      (try! (as-contract (contract-call? payment-token transfer 
              creator-fee-amount 
              tx-sender 
              (get creator pool) 
@@ -250,7 +250,8 @@
         token: token,
         buyer: buyer,
         usdc-amount: usdc-amount,
-        tokens-received: tokens-to-buy
+        tokens-received: tokens-to-buy,
+        payment-token: (contract-of payment-token)
       })
       
       (ok tokens-to-buy)
@@ -258,8 +259,9 @@
   )
 )
 
-;; Sell tokens for USDCx
-(define-public (sell (token principal) (token-amount uint) (min-usdc uint))
+;; Sell tokens for USDCx (or any SIP-010 payment token)
+;; payment-token: The SIP-010 token contract to receive payment in (e.g., USDCx)
+(define-public (sell (token principal) (payment-token <ft-trait>) (token-amount uint) (min-usdc uint))
   (let
     (
       (pool (unwrap! (map-get? token-pools { token: token }) ERR-TOKEN-NOT-FOUND))
@@ -286,20 +288,20 @@
       (asserts! (>= net-usdc-return min-usdc) ERR-SLIPPAGE-TOO-HIGH)
       (asserts! (>= usdc-reserve usdc-return-raw) ERR-INSUFFICIENT-USDC)
       
-      ;; Transfer USDCx to seller
-      (try! (as-contract (contract-call? USDCX-CONTRACT transfer 
+      ;; Transfer payment token to seller
+      (try! (as-contract (contract-call? payment-token transfer 
              net-usdc-return 
              tx-sender 
              seller 
              none)))
       
       ;; Transfer fees
-      (try! (as-contract (contract-call? USDCX-CONTRACT transfer 
+      (try! (as-contract (contract-call? payment-token transfer 
              platform-fee-amount 
              tx-sender 
              (var-get platform-treasury) 
              none)))
-      (try! (as-contract (contract-call? USDCX-CONTRACT transfer 
+      (try! (as-contract (contract-call? payment-token transfer 
              creator-fee-amount 
              tx-sender 
              (get creator pool) 
@@ -325,7 +327,8 @@
         token: token,
         seller: seller,
         tokens-sold: token-amount,
-        usdc-received: net-usdc-return
+        usdc-received: net-usdc-return,
+        payment-token: (contract-of payment-token)
       })
       
       (ok net-usdc-return)

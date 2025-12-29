@@ -17,43 +17,33 @@ export default function HowItWorksPage() {
         {/* Get USDCx Banner */}
         <div className="pump-panel bg-gradient-to-r from-green-900/30 to-blue-900/30 border-green-500/50 mb-8">
           <h2 className="text-xl font-black uppercase mb-4 text-center text-green-400">
-            💵 Get Testnet USDCx
+            💵 Get USDCx
           </h2>
           <div className="space-y-4">
             <div className="flex items-start gap-3">
               <span className="text-green-400 font-black">1.</span>
               <div>
-                <p className="text-white font-bold">Get Sepolia ETH</p>
+                <p className="text-white font-bold">Get USDC on Ethereum</p>
                 <p className="text-[var(--text-muted)] text-sm">
-                  Go to <a href="https://sepoliafaucet.com" target="_blank" className="text-blue-400 underline">sepoliafaucet.com</a> or{' '}
-                  <a href="https://faucet.quicknode.com/ethereum/sepolia" target="_blank" className="text-blue-400 underline">Quicknode Faucet</a>
+                  Buy USDC on any exchange and withdraw to your Ethereum wallet
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <span className="text-green-400 font-black">2.</span>
               <div>
-                <p className="text-white font-bold">Get Sepolia USDC</p>
+                <p className="text-white font-bold">Bridge to Stacks</p>
                 <p className="text-[var(--text-muted)] text-sm">
-                  Mint USDC from <a href="https://faucet.circle.com" target="_blank" className="text-blue-400 underline">Circle USDC Faucet</a> (Sepolia)
+                  Use <a href="https://usdcx.stacks.co" target="_blank" className="text-blue-400 underline">usdcx.stacks.co</a> to bridge USDC from Ethereum → Stacks (Circle xReserve)
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <span className="text-green-400 font-black">3.</span>
               <div>
-                <p className="text-white font-bold">Bridge to Stacks Testnet</p>
-                <p className="text-[var(--text-muted)] text-sm">
-                  Use <a href="https://usdcx.stacks.co" target="_blank" className="text-blue-400 underline">usdcx.stacks.co</a> to bridge USDC from Sepolia → Stacks Testnet
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-green-400 font-black">4.</span>
-              <div>
                 <p className="text-white font-bold">Trade with USDCx! 🎉</p>
                 <p className="text-[var(--text-muted)] text-sm">
-                  Your USDCx will appear in your Hiro Wallet. Now you can trade on stacks.fun!
+                  Your USDCx will appear in your Stacks wallet (Leather/Xverse). Now you can trade on stacks.fun!
                 </p>
               </div>
             </div>
@@ -168,17 +158,11 @@ export default function HowItWorksPage() {
             🔗 About USDCx
           </h2>
           <p className="text-[var(--text-secondary)] text-center mb-4">
-            USDCx is bridged USDC on Stacks, backed 1:1 by native USDC on Ethereum.
+            USDCx is bridged USDC on Stacks via Circle xReserve, backed 1:1 by native USDC on Ethereum.
           </p>
-          <div className="grid md:grid-cols-2 gap-4 text-sm">
-            <div className="bg-zinc-900 p-3 rounded">
-              <div className="text-green-400 font-bold">Testnet Contract</div>
-              <code className="text-xs text-[var(--text-muted)] break-all">
-                ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx
-              </code>
-            </div>
-            <div className="bg-zinc-900 p-3 rounded">
-              <div className="text-green-400 font-bold">Mainnet Contract</div>
+          <div className="text-sm">
+            <div className="bg-zinc-900 p-3 rounded text-center">
+              <div className="text-green-400 font-bold">Mainnet Contract (Circle xReserve)</div>
               <code className="text-xs text-[var(--text-muted)] break-all">
                 SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx
               </code>

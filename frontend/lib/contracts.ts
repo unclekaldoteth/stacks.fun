@@ -3,8 +3,8 @@
 
 import { getStacksConnect, getStacksNetwork, isMainnet, getAppDetails } from './stacks';
 
-// Contract deployer address
-const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
+// Contract deployer address (mainnet)
+const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T';
 
 // Contract addresses
 export const CONTRACTS = {
@@ -36,9 +36,9 @@ export const CONTRACTS = {
         address: DEPLOYER,
         name: 'sip-010-trait',
     },
-    // USDCx token contract (testnet)
+    // USDCx token contract (Circle xReserve on mainnet)
     usdcx: {
-        address: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
+        address: 'SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE',
         name: 'usdcx',
     },
 } as const;
@@ -65,9 +65,10 @@ async function getTransactionHelpers() {
 }
 
 // Buy tokens from bonding curve
+// Uses USDCx as payment token (6 decimals)
 export async function buyTokens(
     tokenContract: string,
-    stxAmount: number,
+    usdcAmount: number,
     minTokens: number,
     options?: ContractCallOptions
 ): Promise<void> {
@@ -82,8 +83,8 @@ export async function buyTokens(
     const { openContractCall } = connect;
     const stxNetwork = isMainnet ? network.STACKS_MAINNET : network.STACKS_TESTNET;
 
-    // Convert STX to micro-STX (1 STX = 1,000,000 micro-STX)
-    const microStxAmount = Math.floor(stxAmount * 1_000_000);
+    // Convert USDC to micro-USDC (1 USDC = 1,000,000 micro-USDC, 6 decimals)
+    const microUsdcAmount = Math.floor(usdcAmount * 1_000_000);
     // Set min-tokens to 0 to allow trades (slippage check bypassed for now)
     // TODO: Fix the formula to match contract calculation exactly
     const minTokensScaled = 0;
@@ -98,7 +99,8 @@ export async function buyTokens(
         functionName: 'buy',
         functionArgs: [
             tx.contractPrincipalCV(tokenAddress, tokenName),
-            tx.uintCV(microStxAmount),
+            tx.contractPrincipalCV(CONTRACTS.usdcx.address, CONTRACTS.usdcx.name), // payment token
+            tx.uintCV(microUsdcAmount),
             tx.uintCV(minTokensScaled),
         ],
         postConditionMode: tx.PostConditionMode.Allow,
@@ -115,10 +117,11 @@ export async function buyTokens(
 }
 
 // Sell tokens to bonding curve
+// Receives USDCx as payment token (6 decimals)
 export async function sellTokens(
     tokenContract: string,
     tokenAmount: number,
-    minStx: number,
+    minUsdc: number,
     options?: ContractCallOptions
 ): Promise<void> {
     const connect = await getStacksConnect();
@@ -134,7 +137,7 @@ export async function sellTokens(
 
     // Convert to proper scales
     const tokenAmountScaled = Math.floor(tokenAmount * 100_000_000); // 8 decimals
-    const minStxMicro = Math.floor(minStx * 1_000_000);
+    const minUsdcMicro = Math.floor(minUsdc * 1_000_000); // 6 decimals
 
     // Parse token contract into address and name
     const [tokenAddress, tokenName] = tokenContract.split('.');
@@ -146,8 +149,9 @@ export async function sellTokens(
         functionName: 'sell',
         functionArgs: [
             tx.contractPrincipalCV(tokenAddress, tokenName),
+            tx.contractPrincipalCV(CONTRACTS.usdcx.address, CONTRACTS.usdcx.name), // payment token
             tx.uintCV(tokenAmountScaled),
-            tx.uintCV(minStxMicro),
+            tx.uintCV(minUsdcMicro),
         ],
         postConditionMode: tx.PostConditionMode.Allow,
         appDetails: getAppDetails(),

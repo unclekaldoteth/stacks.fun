@@ -191,7 +191,7 @@ app.post('/api/seed', async (req, res) => {
 // Sync function to fetch tokens from blockchain
 async function syncTokensFromBlockchain() {
     try {
-        const DEPLOYER = process.env.CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
+        const DEPLOYER = process.env.CONTRACT_DEPLOYER || 'SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T';
         const NETWORK = process.env.STACKS_NETWORK === 'mainnet' ? 'mainnet' : 'testnet';
         const API_BASE = NETWORK === 'mainnet'
             ? 'https://api.hiro.so'

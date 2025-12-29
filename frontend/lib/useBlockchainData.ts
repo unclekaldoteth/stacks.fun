@@ -9,7 +9,7 @@ const HIRO_API = isMainnet
     ? 'https://api.hiro.so'
     : 'https://api.testnet.hiro.so';
 
-const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
+const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T';
 
 // Types
 export interface BlockchainToken {

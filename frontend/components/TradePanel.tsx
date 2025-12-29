@@ -12,8 +12,8 @@ interface TradePanelProps {
 
 type TradeMode = 'buy' | 'sell';
 
-const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
-const STACKS_API = process.env.NEXT_PUBLIC_STACKS_API || 'https://api.testnet.hiro.so';
+const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T';
+const STACKS_API = process.env.NEXT_PUBLIC_STACKS_API || 'https://api.hiro.so';
 
 // USDCx contract on testnet
 const USDCX_CONTRACT = `${CONTRACTS.usdcx.address}.${CONTRACTS.usdcx.name}`;
@@ -121,7 +121,7 @@ export default function TradePanel({
         setTxId(null);
 
         try {
-            const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
+            const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T';
             const tokenContractId = `${DEPLOYER}.launchpad-token`;
 
             // Check if pool exists on bonding-curve-v2, create if not

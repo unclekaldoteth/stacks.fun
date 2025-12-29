@@ -1,36 +1,143 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Stacks.fun Frontend
 
-## Getting Started
+Next.js frontend for the Stacks.fun token launchpad platform.
 
-First, run the development server:
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **UI:** React 19, TypeScript, Tailwind CSS
+- **Wallet:** @stacks/connect v8, WalletConnect
+- **API:** Hiro Platform API
+
+## Quick Start
 
 ```bash
+# Install dependencies
+npm install
+
+# Copy environment template
+cp env.template .env.local
+
+# Configure your .env.local with:
+# - NEXT_PUBLIC_HIRO_API_KEY (from https://platform.hiro.so/)
+# - NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID (from https://cloud.reown.com/)
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NEXT_PUBLIC_STACKS_NETWORK` | `mainnet` or `testnet` | Yes |
+| `NEXT_PUBLIC_CONTRACT_DEPLOYER` | Contract deployer address | Yes |
+| `NEXT_PUBLIC_HIRO_API_KEY` | Hiro Platform API key | Yes |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | WalletConnect project ID | Recommended |
+| `NEXT_PUBLIC_API_URL` | Backend API URL | Yes |
+| `NEXT_PUBLIC_APP_NAME` | App name for wallet | No |
+
+## Project Structure
+
+```
+frontend/
+├── app/                    # Next.js App Router pages
+│   ├── page.tsx           # Homepage - token feed
+│   ├── create/            # Create new token
+│   ├── token/[symbol]/    # Token detail page
+│   ├── launch/[id]/       # Launch detail page
+│   ├── marketplace/       # Token marketplace
+│   ├── activity/          # Activity feed
+│   ├── leaderboard/       # Top traders
+│   ├── profile/           # User profile
+│   └── how-it-works/      # Documentation
+├── components/            # React components
+│   ├── Navbar.tsx         # Navigation
+│   ├── Sidebar.tsx        # Sidebar navigation
+│   ├── TradePanel.tsx     # Buy/sell interface
+│   ├── TokenCard.tsx      # Token display card
+│   ├── BondingCurveChart.tsx  # Price chart
+│   ├── WalletProvider.tsx # Wallet context
+│   └── ...
+├── lib/                   # Utilities
+│   ├── contracts.ts       # Contract interactions
+│   ├── stacks.ts          # Stacks utilities
+│   ├── api.ts             # Backend API client
+│   └── hiro.ts            # Hiro API client
+└── config.ts              # App configuration
+```
+
+## Key Features
+
+### Wallet Integration
+
+Supports multiple Stacks wallets:
+- **Leather** - Browser extension
+- **Xverse** - Browser extension  
+- **WalletConnect** - Mobile wallets via QR code
+
+```typescript
+import { connect } from '@stacks/connect';
+
+await connect({
+  walletConnectProjectId: 'your-project-id',
+  network: 'mainnet',
+});
+```
+
+### Contract Interactions
+
+All contract calls are in `lib/contracts.ts`:
+
+```typescript
+import { buyTokens, sellTokens, registerToken } from '@/lib/contracts';
+
+// Buy tokens
+await buyTokens(tokenContract, stxAmount, minTokens, {
+  onFinish: (data) => console.log('TX:', data.txId),
+});
+
+// Sell tokens
+await sellTokens(tokenContract, tokenAmount, minStx);
+
+// Register new token
+await registerToken(name, symbol, imageUri, description);
+```
+
+## Deployment
+
+### Vercel (Recommended)
+
+```bash
+npm run build
+vercel deploy
+```
+
+### Environment for Production
+
+Set these in your Vercel dashboard:
+
+```
+NEXT_PUBLIC_STACKS_NETWORK=mainnet
+NEXT_PUBLIC_CONTRACT_DEPLOYER=SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T
+NEXT_PUBLIC_HIRO_API_KEY=your_key
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_id
+NEXT_PUBLIC_API_URL=https://your-backend.railway.app
+```
+
+## Scripts
+
+```bash
+npm run dev      # Start dev server
+npm run build    # Production build
+npm run start    # Start production server
+npm run lint     # Run ESLint
+```
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Stacks.js Documentation](https://docs.stacks.co/docs/stacks-academy/stacks-js)
+- [Hiro Platform](https://platform.hiro.so/)

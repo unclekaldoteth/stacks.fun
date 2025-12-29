@@ -75,7 +75,7 @@
                     "description": "Triggered when a new token is registered on the launchpad",
                     "if_this": {
                         "scope": "contract_call",
-                        "contract_identifier": "${MAINNET_DEPLOYER}.launchpad-factory",
+                        "contract_identifier": "SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T.launchpad-factory",
                         "method": "register-token"
                     },
                     "then_that": {
@@ -86,11 +86,11 @@
                     }
                 },
                 {
-                    "name": "token-buy",
-                    "description": "Triggered when tokens are purchased on the bonding curve",
+                    "name": "token-buy-v1",
+                    "description": "Triggered when tokens are purchased on the bonding curve (v1)",
                     "if_this": {
                         "scope": "contract_call",
-                        "contract_identifier": "${MAINNET_DEPLOYER}.bonding-curve",
+                        "contract_identifier": "SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T.bonding-curve",
                         "method": "buy"
                     },
                     "then_that": {
@@ -101,11 +101,71 @@
                     }
                 },
                 {
-                    "name": "token-sell",
-                    "description": "Triggered when tokens are sold on the bonding curve",
+                    "name": "token-buy-v2",
+                    "description": "Triggered when tokens are purchased on the bonding curve (v2)",
                     "if_this": {
                         "scope": "contract_call",
-                        "contract_identifier": "${MAINNET_DEPLOYER}.bonding-curve",
+                        "contract_identifier": "SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T.bonding-curve-v2",
+                        "method": "buy"
+                    },
+                    "then_that": {
+                        "http_post": {
+                            "url": "${WEBHOOK_URL}/api/chainhook",
+                            "authorization_header": "Bearer ${CHAINHOOK_SECRET}"
+                        }
+                    }
+                },
+                {
+                    "name": "token-buy-usdcx",
+                    "description": "Triggered when tokens are purchased with USDCx",
+                    "if_this": {
+                        "scope": "contract_call",
+                        "contract_identifier": "SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T.bonding-curve-usdcx",
+                        "method": "buy"
+                    },
+                    "then_that": {
+                        "http_post": {
+                            "url": "${WEBHOOK_URL}/api/chainhook",
+                            "authorization_header": "Bearer ${CHAINHOOK_SECRET}"
+                        }
+                    }
+                },
+                {
+                    "name": "token-sell-v1",
+                    "description": "Triggered when tokens are sold on the bonding curve (v1)",
+                    "if_this": {
+                        "scope": "contract_call",
+                        "contract_identifier": "SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T.bonding-curve",
+                        "method": "sell"
+                    },
+                    "then_that": {
+                        "http_post": {
+                            "url": "${WEBHOOK_URL}/api/chainhook",
+                            "authorization_header": "Bearer ${CHAINHOOK_SECRET}"
+                        }
+                    }
+                },
+                {
+                    "name": "token-sell-v2",
+                    "description": "Triggered when tokens are sold on the bonding curve (v2)",
+                    "if_this": {
+                        "scope": "contract_call",
+                        "contract_identifier": "SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T.bonding-curve-v2",
+                        "method": "sell"
+                    },
+                    "then_that": {
+                        "http_post": {
+                            "url": "${WEBHOOK_URL}/api/chainhook",
+                            "authorization_header": "Bearer ${CHAINHOOK_SECRET}"
+                        }
+                    }
+                },
+                {
+                    "name": "token-sell-usdcx",
+                    "description": "Triggered when tokens are sold for USDCx",
+                    "if_this": {
+                        "scope": "contract_call",
+                        "contract_identifier": "SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T.bonding-curve-usdcx",
                         "method": "sell"
                     },
                     "then_that": {
@@ -120,7 +180,7 @@
                     "description": "Triggered when a token graduates to ALEX DEX",
                     "if_this": {
                         "scope": "contract_call",
-                        "contract_identifier": "${MAINNET_DEPLOYER}.alex-graduation",
+                        "contract_identifier": "SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T.alex-graduation",
                         "method": "graduate-token"
                     },
                     "then_that": {

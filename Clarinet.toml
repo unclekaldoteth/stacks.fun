@@ -5,57 +5,66 @@ authors = []
 telemetry = false
 cache_dir = "./.cache"
 
+# ============================================
+# LOCAL DEVELOPMENT CONFIG
+# ============================================
+# Note: Using Clarity 3 / epoch 3.0 for local development due to 
+# Clarinet limitation with epoch 3.3 boot contracts.
+# Mainnet deployment uses Clarity 4 / epoch 3.3 (see deployments/*.yaml)
+# ============================================
+
 # SIP-010 Trait
 [contracts.sip-010-trait]
 path = "contracts/sip-010-trait.clar"
 clarity_version = 3
-epoch = 3.0
+epoch = "3.0"
 
 # Launchpad Factory
 [contracts.launchpad-factory]
 path = "contracts/launchpad-factory.clar"
 clarity_version = 3
-epoch = 3.0
+epoch = "3.0"
 
 # Bonding Curve (v1 - deprecated)
 [contracts.bonding-curve]
 path = "contracts/bonding-curve.clar"
 clarity_version = 3
-epoch = 3.0
+epoch = "3.0"
 depends_on = ["sip-010-trait"]
 
 # Bonding Curve V2 (improved tokenomics)
 [contracts.bonding-curve-v2]
 path = "contracts/bonding-curve-v2.clar"
 clarity_version = 3
-epoch = 3.0
+epoch = "3.0"
 depends_on = ["sip-010-trait"]
 
 # Bonding Curve USDCx (USDC payments)
+# Uses trait-based token passing for flexibility across environments
 [contracts.bonding-curve-usdcx]
 path = "contracts/bonding-curve-usdcx.clar"
 clarity_version = 3
-epoch = 3.0
-depends_on = ["sip-010-trait", "mock-usdcx"]
+epoch = "3.0"
+depends_on = ["sip-010-trait"]
 
 # Mock USDCx for local testing
 [contracts.mock-usdcx]
 path = "contracts/mock-usdcx.clar"
 clarity_version = 3
-epoch = 3.0
+epoch = "3.0"
 depends_on = ["sip-010-trait"]
 
 # ALEX Graduation
 [contracts.alex-graduation]
 path = "contracts/alex-graduation.clar"
 clarity_version = 3
-epoch = 3.0
+epoch = "3.0"
 
 # Launchpad Token Template
 [contracts.launchpad-token]
 path = "contracts/launchpad-token.clar"
 clarity_version = 3
-epoch = 3.0
+epoch = "3.0"
 depends_on = ["sip-010-trait"]
 
 # Mainnet deployment
@@ -70,7 +79,8 @@ node = "https://stacks-node-api.testnet.stacks.co"
 
 # Devnet for local testing
 [repl.settings]
-include_boot_contracts = []
+# Include boot contracts for Clarity 4 support
+include_boot_contracts = ["costs-4"]
 
-# Network settings
-[project.requirements]
+# Note: bonding-curve-usdcx uses trait-based token passing.
+# For local testing, pass mock-usdcx. For mainnet, pass the real USDCx contract.

@@ -23,7 +23,7 @@ export default function CreateTokenPage() {
     const [poolExists, setPoolExists] = useState<boolean | null>(null);
     const [step, setStep] = useState<'idle' | 'creating-pool' | 'registering' | 'done'>('idle');
 
-    const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'ST1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX28M1PMM';
+    const DEPLOYER = process.env.NEXT_PUBLIC_CONTRACT_DEPLOYER || 'SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T';
     const tokenContractId = `${DEPLOYER}.launchpad-token`;
 
     // Check if pool exists on mount
