@@ -37,7 +37,7 @@ Stacks.fun enables anyone to create and trade tokens using automated bonding cur
 
 ## Architecture Overview
 
-### Smart Contracts (Clarity 3)
+### Smart Contracts (Clarity 4)
 
 - **Launchpad Factory**
   Token registration and metadata management.
@@ -94,8 +94,8 @@ stacks.fun/
 
 - **Network:** Stacks Mainnet
 - **Deployment Date:** December 29, 2025
-- **Clarity Version:** 3
-- **Epoch:** 3.0
+- **Clarity Version:** 4
+- **Epoch:** 3.3
 - **Status:** Confirmed on-chain
 
 ### Explorer Links
@@ -261,9 +261,9 @@ SUPABASE_ANON_KEY=your_supabase_key
 - Hiro Chainhooks
 
 ### Smart Contracts
-- Clarity 3
+- Clarity 4
 - Stacks Blockchain
-- Epoch 3.0
+- Epoch 3.3
 
 ---
 
