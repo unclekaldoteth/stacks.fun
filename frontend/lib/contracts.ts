@@ -66,6 +66,7 @@ async function getTransactionHelpers() {
 
 // Buy tokens from bonding curve
 // Uses USDCx as payment token (6 decimals)
+// NOTE: Deployed mainnet contract uses hardcoded USDCx - 3 arguments only
 export async function buyTokens(
     tokenContract: string,
     usdcAmount: number,
@@ -99,7 +100,6 @@ export async function buyTokens(
         functionName: 'buy',
         functionArgs: [
             tx.contractPrincipalCV(tokenAddress, tokenName),
-            tx.contractPrincipalCV(CONTRACTS.usdcx.address, CONTRACTS.usdcx.name), // payment token
             tx.uintCV(microUsdcAmount),
             tx.uintCV(minTokensScaled),
         ],
@@ -118,6 +118,7 @@ export async function buyTokens(
 
 // Sell tokens to bonding curve
 // Receives USDCx as payment token (6 decimals)
+// NOTE: Deployed mainnet contract uses hardcoded USDCx - 3 arguments only
 export async function sellTokens(
     tokenContract: string,
     tokenAmount: number,
@@ -149,7 +150,6 @@ export async function sellTokens(
         functionName: 'sell',
         functionArgs: [
             tx.contractPrincipalCV(tokenAddress, tokenName),
-            tx.contractPrincipalCV(CONTRACTS.usdcx.address, CONTRACTS.usdcx.name), // payment token
             tx.uintCV(tokenAmountScaled),
             tx.uintCV(minUsdcMicro),
         ],

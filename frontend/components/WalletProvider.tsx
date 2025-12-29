@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
-import { WALLETCONNECT_PROJECT_ID, NETWORK } from '@/config';
+import { WALLETCONNECT_PROJECT_ID, NETWORK, APP_NAME } from '@/config';
 import { getSTXBalance } from '@/lib/hiro';
 
 interface WalletContextType {
@@ -28,12 +28,24 @@ function getAddressForNetwork(addresses: { address: string }[] | undefined, isMa
     const matchingAddress = addresses.find(addr => addr.address.startsWith(prefix));
 
     if (matchingAddress) {
+        console.log(`Found ${isMainnet ? 'mainnet' : 'testnet'} address:`, matchingAddress.address);
         return matchingAddress.address;
     }
 
+    // Log all available addresses for debugging
+    console.warn(`No ${isMainnet ? 'mainnet (SP)' : 'testnet (ST)'} address found. Available addresses:`, 
+        addresses.map(a => a.address));
+    
     // Fallback: return first address if no matching prefix found
-    console.warn(`No ${isMainnet ? 'mainnet' : 'testnet'} address found, using first available address`);
     return addresses[0]?.address || null;
+}
+
+// Get app details for wallet connection
+function getAppDetails() {
+    return {
+        name: APP_NAME,
+        icon: typeof window !== 'undefined' ? `${window.location.origin}/favicon.ico` : '/favicon.ico',
+    };
 }
 
 export function WalletProvider({ children }: { children: ReactNode }) {
@@ -46,7 +58,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         setIsClient(true);
-    }, []);
+        console.log(`WalletProvider initialized - Network: ${NETWORK}, isMainnet: ${isMainnet}`);
+    }, [isMainnet]);
 
     // Check for existing session on mount
     useEffect(() => {
@@ -57,14 +70,25 @@ export function WalletProvider({ children }: { children: ReactNode }) {
                 const { getLocalStorage } = await import('@stacks/connect');
                 const userData = getLocalStorage();
 
+                console.log('Checking existing session, userData:', userData ? 'found' : 'not found');
+
                 if (userData?.addresses?.stx && userData.addresses.stx.length > 0) {
                     const addr = getAddressForNetwork(userData.addresses.stx, isMainnet);
 
                     if (addr) {
+                        // Verify the address matches the expected network
+                        const expectedPrefix = isMainnet ? 'SP' : 'ST';
+                        if (!addr.startsWith(expectedPrefix)) {
+                            console.warn(`Address ${addr} does not match expected network (${NETWORK}). Clearing session.`);
+                            // Don't auto-connect with wrong network address
+                            return;
+                        }
+
                         setIsConnected(true);
                         setAddress(addr);
                         const bal = await getSTXBalance(addr);
                         if (bal) setBalance(bal);
+                        console.log(`Restored session for ${addr} on ${NETWORK}`);
                     }
                 }
             } catch (err) {
@@ -85,28 +109,72 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         if (!isClient || typeof window === 'undefined') return;
 
         setIsLoading(true);
+        console.log(`Connecting wallet on ${NETWORK}...`);
+
         try {
             const { connect, getLocalStorage } = await import('@stacks/connect');
 
-            await connect({
-                walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
+            // Build connection options
+            const connectionOptions: Parameters<typeof connect>[0] = {
                 network: isMainnet ? 'mainnet' : 'testnet',
+                appDetails: getAppDetails(),
+            };
+
+            // Only include WalletConnect project ID if it's configured
+            if (WALLETCONNECT_PROJECT_ID && WALLETCONNECT_PROJECT_ID !== 'your_walletconnect_project_id_here') {
+                connectionOptions.walletConnectProjectId = WALLETCONNECT_PROJECT_ID;
+            }
+
+            console.log('Connection options:', { 
+                network: connectionOptions.network, 
+                hasWalletConnect: !!connectionOptions.walletConnectProjectId 
             });
 
+            await connect(connectionOptions);
+
+            // Small delay to ensure wallet data is stored
+            await new Promise(resolve => setTimeout(resolve, 100));
+
             const userData = getLocalStorage();
+            console.log('Post-connect userData:', userData ? 'found' : 'not found');
 
             if (userData?.addresses?.stx && userData.addresses.stx.length > 0) {
+                console.log('Available STX addresses:', userData.addresses.stx.map((a: { address: string }) => a.address));
+                
                 const addr = getAddressForNetwork(userData.addresses.stx, isMainnet);
 
                 if (addr) {
+                    // Verify address matches network
+                    const expectedPrefix = isMainnet ? 'SP' : 'ST';
+                    if (!addr.startsWith(expectedPrefix)) {
+                        console.error(`Connected with wrong network address: ${addr}. Expected ${expectedPrefix}... for ${NETWORK}`);
+                        alert(`Please switch your wallet to ${isMainnet ? 'Mainnet' : 'Testnet'} and try again.`);
+                        setIsLoading(false);
+                        return;
+                    }
+
                     setIsConnected(true);
                     setAddress(addr);
                     const bal = await getSTXBalance(addr);
                     if (bal) setBalance(bal);
+                    console.log(`Successfully connected: ${addr} with balance ${bal} STX`);
+                } else {
+                    console.error('No valid address found after connection');
+                    alert(`No ${isMainnet ? 'mainnet' : 'testnet'} address found. Please ensure your wallet is set to the correct network.`);
                 }
+            } else {
+                console.warn('No addresses returned from wallet');
             }
         } catch (err) {
             console.error('Failed to connect wallet:', err);
+            // Provide more helpful error message
+            if (err instanceof Error) {
+                if (err.message.includes('User rejected')) {
+                    console.log('User cancelled connection');
+                } else {
+                    alert(`Failed to connect: ${err.message}`);
+                }
+            }
         } finally {
             setIsLoading(false);
         }
@@ -119,6 +187,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             setIsConnected(false);
             setAddress(null);
             setBalance(null);
+            console.log('Wallet disconnected');
         } catch (err) {
             console.error('Failed to disconnect:', err);
         }
