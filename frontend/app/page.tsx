@@ -137,15 +137,15 @@ export default function Home() {
           </div>
           <div className="stat-item">
             <span className="pump-label">daily volume</span>
-            <div className="stat-val text-[var(--accent-orange)]">$124K</div>
+            <div className="stat-val text-[var(--accent-orange)]">$0</div>
           </div>
           <div className="stat-item">
             <span className="pump-label">graduated</span>
-            <div className="stat-val text-[var(--accent-yellow)]">12</div>
+            <div className="stat-val text-[var(--accent-yellow)]">0</div>
           </div>
           <div className="stat-item">
             <span className="pump-label">active traders</span>
-            <div className="stat-val">2,482</div>
+            <div className="stat-val">0</div>
           </div>
         </div>
 
