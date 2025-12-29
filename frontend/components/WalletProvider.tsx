@@ -9,15 +9,32 @@ interface WalletContextType {
     address: string | null;
     balance: string | null;
     isLoading: boolean;
-    isConnecting: boolean; // alias for isLoading
+    isConnecting: boolean;
     isMainnet: boolean;
     connectWallet: () => Promise<void>;
-    connect: () => Promise<void>; // alias for connectWallet
+    connect: () => Promise<void>;
     disconnect: () => void;
     refreshBalance: () => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType | null>(null);
+
+// Helper function to select the correct address based on network
+// Mainnet addresses start with 'SP', testnet addresses start with 'ST'
+function getAddressForNetwork(addresses: { address: string }[] | undefined, isMainnet: boolean): string | null {
+    if (!addresses || addresses.length === 0) return null;
+
+    const prefix = isMainnet ? 'SP' : 'ST';
+    const matchingAddress = addresses.find(addr => addr.address.startsWith(prefix));
+
+    if (matchingAddress) {
+        return matchingAddress.address;
+    }
+
+    // Fallback: return first address if no matching prefix found
+    console.warn(`No ${isMainnet ? 'mainnet' : 'testnet'} address found, using first available address`);
+    return addresses[0]?.address || null;
+}
 
 export function WalletProvider({ children }: { children: ReactNode }) {
     const [isConnected, setIsConnected] = useState(false);
@@ -39,20 +56,23 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             try {
                 const { getLocalStorage } = await import('@stacks/connect');
                 const userData = getLocalStorage();
-                if (userData?.addresses?.stx?.[0]?.address) {
-                    const addr = userData.addresses.stx[0].address;
-                    setIsConnected(true);
-                    setAddress(addr);
-                    // Fetch balance
-                    const bal = await getSTXBalance(addr);
-                    if (bal) setBalance(bal);
+
+                if (userData?.addresses?.stx && userData.addresses.stx.length > 0) {
+                    const addr = getAddressForNetwork(userData.addresses.stx, isMainnet);
+
+                    if (addr) {
+                        setIsConnected(true);
+                        setAddress(addr);
+                        const bal = await getSTXBalance(addr);
+                        if (bal) setBalance(bal);
+                    }
                 }
             } catch (err) {
                 console.error('Failed to check session:', err);
             }
         };
         checkSession();
-    }, [isClient]);
+    }, [isClient, isMainnet]);
 
     const refreshBalance = useCallback(async () => {
         if (address) {
@@ -68,35 +88,22 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         try {
             const { connect, getLocalStorage } = await import('@stacks/connect');
 
-            // Key configuration for WalletConnect to work:
-            // - walletConnectProjectId: Required for WalletConnect option
-            // - network: Required to avoid 'network in undefined' error
-            // - metadata: Set correct app URL for WalletConnect (not typed in @stacks/connect but passed through to AppKit)
-            const appUrl = typeof window !== 'undefined'
-                ? window.location.origin
-                : 'https://stacksfun.vercel.app';
-
             await connect({
                 walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
                 network: isMainnet ? 'mainnet' : 'testnet',
-                // @ts-expect-error - metadata is passed through to underlying WalletConnect/AppKit
-                metadata: {
-                    name: 'Stacks.fun',
-                    description: 'Token Launchpad on Stacks',
-                    url: appUrl,
-                    icons: [`${appUrl}/favicon.ico`],
-                },
             });
 
-            // Get address from localStorage after connection
             const userData = getLocalStorage();
-            if (userData?.addresses?.stx?.[0]?.address) {
-                const addr = userData.addresses.stx[0].address;
-                setIsConnected(true);
-                setAddress(addr);
-                // Fetch balance
-                const bal = await getSTXBalance(addr);
-                if (bal) setBalance(bal);
+
+            if (userData?.addresses?.stx && userData.addresses.stx.length > 0) {
+                const addr = getAddressForNetwork(userData.addresses.stx, isMainnet);
+
+                if (addr) {
+                    setIsConnected(true);
+                    setAddress(addr);
+                    const bal = await getSTXBalance(addr);
+                    if (bal) setBalance(bal);
+                }
             }
         } catch (err) {
             console.error('Failed to connect wallet:', err);
@@ -123,10 +130,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             address,
             balance,
             isLoading,
-            isConnecting: isLoading, // alias
+            isConnecting: isLoading,
             isMainnet,
             connectWallet,
-            connect: connectWallet, // alias
+            connect: connectWallet,
             disconnect,
             refreshBalance
         }}>
@@ -138,7 +145,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 export function useWallet() {
     const context = useContext(WalletContext);
     if (!context) {
-        // Return safe defaults for SSR
         const noop = async () => { };
         return {
             isConnected: false,
@@ -156,7 +162,6 @@ export function useWallet() {
     return context;
 }
 
-// Shorthand hooks
 export function useIsConnected() {
     const { isConnected } = useWallet();
     return isConnected;
@@ -167,7 +172,6 @@ export function useAddress() {
     return address;
 }
 
-// Format address for display
 export function formatAddress(address: string, startChars = 6, endChars = 4): string {
     if (!address || address.length < startChars + endChars) return address;
     return `${address.slice(0, startChars)}...${address.slice(-endChars)}`;
