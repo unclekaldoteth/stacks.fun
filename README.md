@@ -2,7 +2,7 @@
 
 A decentralized token launchpad built on Stacks with bonding curves, secured by Bitcoin. Launch tokens, trade on automated market makers, and graduate to ALEX DEX.
 
-Stacks.fun enables anyone to create and trade tokens using automated bonding curve pricing. Supports STX and USDCx with seamless wallet integration including WalletConnect for mobile wallets.
+Stacks.fun enables anyone to create and trade tokens using automated bonding curve pricing. **Trading is powered by USDCx** (bridged USDC via Circle xReserve) with seamless wallet integration including WalletConnect for mobile wallets.
 
 ---
 
@@ -20,8 +20,8 @@ Stacks.fun enables anyone to create and trade tokens using automated bonding cur
 
 ### For Token Creators
 - No-code SIP-010 token deployment
-- 2% creator fee on all trades
-- Automatic liquidity graduation to ALEX DEX
+- 1% creator fee on all trades
+- Automatic liquidity graduation to ALEX DEX at $69K market cap
 
 ### For Traders
 - Early access to new tokens
@@ -42,11 +42,11 @@ Stacks.fun enables anyone to create and trade tokens using automated bonding cur
 - **Launchpad Factory**
   Token registration and metadata management.
 
-- **Bonding Curve V2**
-  Quadratic AMM with STX support and dynamic pricing.
+- **Bonding Curve USDCx** (Primary)
+  USDCx stablecoin trading with Circle xReserve integration. Uses trait-based token passing for flexibility.
 
-- **Bonding Curve USDCx**
-  USDCx stablecoin trading with Circle xReserve integration.
+- **Bonding Curve V2**
+  STX trading support (legacy).
 
 - **ALEX Graduation**
   Automatic liquidity migration to ALEX DEX.
@@ -66,10 +66,12 @@ stacks.fun/
 ```
 
 ### Backend + Frontend
-- REST endpoints for tokens and activity
-- Real-time price feeds
+- REST API with real-time platform statistics
+- Token and activity endpoints with mainnet filtering
+- Real-time price feeds and bonding curve calculations
 - User portfolio tracking
 - Chainhook event indexing
+- Production deployment on Railway (backend) and Vercel (frontend)
 
 ---
 
@@ -146,9 +148,13 @@ SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx
 
 | Function | Description |
 |----------|-------------|
-| `buy` | Purchase tokens with USDCx |
-| `sell` | Sell tokens for USDCx |
+| `buy` | Purchase tokens with USDCx (trait-based payment token) |
+| `sell` | Sell tokens for USDCx (trait-based payment token) |
 | `get-current-price` | Get current token price in USDCx |
+| `get-buy-price` | Calculate cost to buy tokens |
+| `get-sell-price` | Calculate return for selling tokens |
+| `get-pool-info` | Get pool reserves and status |
+| `create-pool` | Initialize bonding curve pool for token |
 
 ---
 
@@ -215,11 +221,22 @@ clarinet deployments apply --mainnet
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/tokens` | GET | List all tokens |
-| `/api/tokens/trending` | GET | Get trending tokens |
-| `/api/tokens/:symbol` | GET | Get token by symbol |
-| `/api/activity` | GET | Recent trade activity |
-| `/api/stats` | GET | Platform statistics |
+| `/` | GET | Service info and available endpoints |
+| `/api/health` | GET | Health check and service status |
+| `/api/stats` | GET | Real-time platform statistics (tokens launched, 24h volume, graduated, active traders) |
+| `/api/tokens` | GET | List all tokens (mainnet-filtered) |
+| `/api/tokens/trending` | GET | Get trending tokens by market cap |
+| `/api/tokens/:symbol` | GET | Get token by symbol or ID |
+| `/api/tokens/:id/trades` | GET | Get trade history for a token |
+| `/api/activity` | GET | Recent trade activity feed (mainnet-filtered) |
+| `/api/leaderboard` | GET | Top traders by volume (mainnet-filtered) |
+| `/api/chainhook` | POST | Chainhook webhook handler for blockchain events |
+
+### Production API
+
+**Backend URL:** `https://stacksfun-production.up.railway.app`
+
+All endpoints automatically filter for mainnet addresses (`SP...`) when `STACKS_NETWORK=mainnet`.
 
 ---
 
@@ -240,8 +257,10 @@ PORT=3001
 STACKS_NETWORK=mainnet
 CONTRACT_DEPLOYER=SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T
 SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ```
+
+**Note:** Railway automatically sets `PORT`. Use `SUPABASE_SERVICE_ROLE_KEY` (not anon key) for backend operations.
 
 ---
 
@@ -269,9 +288,16 @@ SUPABASE_ANON_KEY=your_supabase_key
 
 ## How It Works
 
-1. **Create Token** - Define name, symbol, description, and image
-2. **Trade** - Buy and sell on bonding curve (Price = k * supply^2)
-3. **Graduate** - At 100K STX market cap, migrate to ALEX DEX
+1. **Create Token** - Define name, symbol, description, and image. Token is deployed instantly to Stacks blockchain.
+2. **Trade with USDCx** - Buy and sell on linear bonding curve. Price starts at $0.0001 and increases as tokens are sold.
+3. **Graduate** - At **$69,000 USDC market cap**, liquidity automatically migrates to ALEX DEX.
+
+### Bonding Curve Mechanics
+
+- **Starting Price:** $0.0001 per token
+- **Initial Rate:** ~10,000 tokens per $1 USDC
+- **Graduation Threshold:** $69,000 market cap
+- **Price Formula:** Linear bonding curve (price increases with supply)
 
 ### Fee Structure
 
@@ -302,7 +328,17 @@ SUPABASE_ANON_KEY=your_supabase_key
 ### Phase 4 - Mainnet (Completed)
 - Contract deployment
 - WalletConnect integration
-- Production API
+- Production API on Railway
+- Frontend deployment on Vercel
+- Real-time stats and mainnet filtering
+- USDCx-based trading (all prices in USD)
+
+### Phase 5 - Production Launch (Completed)
+- Database cleanup and reset scripts
+- Mainnet address filtering (SP addresses only)
+- Real-time platform statistics
+- Currency display standardization (USD/USDC)
+- Production-ready deployment
 
 ---
 
@@ -320,6 +356,52 @@ MIT
 - Hiro Systems
 - ALEX Lab
 - Circle (USDCx)
+
+---
+
+## Database Management
+
+### Reset for Production Launch
+
+To start fresh for production, run in Supabase SQL Editor:
+
+```sql
+-- Delete all data
+DELETE FROM trades;
+DELETE FROM activity;
+DELETE FROM leaderboard;
+DELETE FROM tokens;
+```
+
+See `backend/migrations/reset-for-launch.sql` for the complete script.
+
+### Cleanup Testnet Data
+
+To remove testnet data (ST addresses) from mainnet database:
+
+```sql
+DELETE FROM trades WHERE token_id IN (SELECT id FROM tokens WHERE creator LIKE 'ST%');
+DELETE FROM activity WHERE address LIKE 'ST%';
+DELETE FROM leaderboard WHERE address LIKE 'ST%';
+DELETE FROM tokens WHERE creator LIKE 'ST%';
+```
+
+See `backend/migrations/cleanup-testnet-data.sql` for details.
+
+---
+
+## Production Deployment
+
+### Frontend (Vercel)
+- **URL:** https://stacksfun.vercel.app
+- Auto-deploys from `main` branch
+- Environment variables configured in Vercel dashboard
+
+### Backend (Railway)
+- **URL:** https://stacksfun-production.up.railway.app
+- Auto-deploys from `main` branch
+- Connected to Supabase PostgreSQL database
+- Chainhook webhooks configured for real-time event indexing
 
 ---
 
