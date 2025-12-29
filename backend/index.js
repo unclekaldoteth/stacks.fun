@@ -81,12 +81,18 @@ app.get('/api/health', (req, res) => {
 app.get('/api/tokens', async (req, res) => {
     try {
         const { orderBy = 'created_at', order = 'desc', graduated } = req.query;
+        const isMainnet = process.env.STACKS_NETWORK === 'mainnet';
 
         if (supabase) {
             let query = supabase.from('tokens').select('*');
 
             if (graduated !== undefined) {
                 query = query.eq('is_graduated', graduated === 'true');
+            }
+
+            // On mainnet, only show tokens created by mainnet addresses (starting with SP)
+            if (isMainnet) {
+                query = query.like('creator', 'SP%');
             }
 
             const { data, error } = await query.order(orderBy, { ascending: order === 'asc' });
@@ -345,12 +351,20 @@ app.post('/api/sync', async (req, res) => {
 app.get('/api/tokens/trending', async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
+        const isMainnet = process.env.STACKS_NETWORK === 'mainnet';
 
         if (supabase) {
-            const { data, error } = await supabase
+            let query = supabase
                 .from('tokens')
                 .select('*')
-                .eq('is_graduated', false)
+                .eq('is_graduated', false);
+
+            // On mainnet, only show tokens created by mainnet addresses (starting with SP)
+            if (isMainnet) {
+                query = query.like('creator', 'SP%');
+            }
+
+            const { data, error } = await query
                 .order('market_cap', { ascending: false })
                 .limit(limit);
 
@@ -517,12 +531,18 @@ app.get('/api/activity', async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 50;
         const eventType = req.query.type;
+        const isMainnet = process.env.STACKS_NETWORK === 'mainnet';
 
         if (supabase) {
             let query = supabase.from('activity').select('*');
 
             if (eventType) {
                 query = query.eq('event_type', eventType);
+            }
+
+            // On mainnet, only show activity from mainnet addresses (starting with SP)
+            if (isMainnet) {
+                query = query.like('address', 'SP%');
             }
 
             const { data, error } = await query
@@ -544,11 +564,19 @@ app.get('/api/activity', async (req, res) => {
 app.get('/api/leaderboard', async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 100;
+        const isMainnet = process.env.STACKS_NETWORK === 'mainnet';
 
         if (supabase) {
-            const { data, error } = await supabase
+            let query = supabase
                 .from('leaderboard')
-                .select('*')
+                .select('*');
+
+            // On mainnet, only show leaderboard entries from mainnet addresses (starting with SP)
+            if (isMainnet) {
+                query = query.like('address', 'SP%');
+            }
+
+            const { data, error } = await query
                 .order('total_volume_stx', { ascending: false })
                 .limit(limit);
 
