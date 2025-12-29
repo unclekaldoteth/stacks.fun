@@ -1,0 +1,67 @@
+---
+id: 0
+name: Mainnet deployment
+network: mainnet
+stacks-node: "https://api.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoin.blockstack.com:8332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: alex-graduation
+            expected-sender: SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T
+            cost: 44240
+            path: contracts/alex-graduation.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: sip-010-trait
+            expected-sender: SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T
+            cost: 7840
+            path: contracts/sip-010-trait.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: bonding-curve
+            expected-sender: SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T
+            cost: 103540
+            path: contracts/bonding-curve.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: bonding-curve-usdcx
+            expected-sender: SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T
+            cost: 113760
+            path: contracts/bonding-curve-usdcx.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: bonding-curve-v2
+            expected-sender: SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T
+            cost: 103540
+            path: contracts/bonding-curve-v2.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: launchpad-factory
+            expected-sender: SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T
+            cost: 36560
+            path: contracts/launchpad-factory.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: launchpad-token
+            expected-sender: SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T
+            cost: 33380
+            path: contracts/launchpad-token.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: mock-usdcx
+            expected-sender: SP1ZGGS886YCZHMFXJR1EK61ZP34FNWNSX32N685T
+            cost: 18480
+            path: contracts/mock-usdcx.clar
+            anchor-block-only: true
+            clarity-version: 3
+      epoch: "3.0"

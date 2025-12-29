@@ -36,6 +36,13 @@ depends_on = ["sip-010-trait"]
 path = "contracts/bonding-curve-usdcx.clar"
 clarity_version = 3
 epoch = 3.0
+depends_on = ["sip-010-trait", "mock-usdcx"]
+
+# Mock USDCx for local testing
+[contracts.mock-usdcx]
+path = "contracts/mock-usdcx.clar"
+clarity_version = 3
+epoch = 3.0
 depends_on = ["sip-010-trait"]
 
 # ALEX Graduation

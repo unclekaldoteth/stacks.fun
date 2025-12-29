@@ -18,11 +18,12 @@
 
 (define-constant CONTRACT-OWNER tx-sender)
 
-;; USDCx contract on testnet
+;; USDCx contract addresses
+;; For local testing: use the mock contract
 ;; Testnet: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx
-;; Mainnet: SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx
-(define-constant USDCX-CONTRACT 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx)
-
+;; Mainnet: SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx  
+;; IMPORTANT: Change this to mainnet address before production deployment!
+(define-constant USDCX-CONTRACT 'SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx)
 ;; Fixed-point math constants
 ;; USDCx uses 6 decimals (like native USDC)
 ;; Tokens use 8 decimals
@@ -190,21 +191,21 @@
       (asserts! (>= tokens-to-buy min-tokens) ERR-SLIPPAGE-TOO-HIGH)
       
       ;; Transfer USDCx from buyer to contract
-      (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx transfer 
+      (try! (contract-call? USDCX-CONTRACT transfer 
              usdc-amount 
              buyer 
              (as-contract tx-sender) 
              none))
       
       ;; Transfer platform fee
-      (try! (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx transfer 
+      (try! (as-contract (contract-call? USDCX-CONTRACT transfer 
              platform-fee-amount 
              tx-sender 
              (var-get platform-treasury) 
              none)))
       
       ;; Transfer creator fee
-      (try! (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx transfer 
+      (try! (as-contract (contract-call? USDCX-CONTRACT transfer 
              creator-fee-amount 
              tx-sender 
              (get creator pool) 
@@ -286,19 +287,19 @@
       (asserts! (>= usdc-reserve usdc-return-raw) ERR-INSUFFICIENT-USDC)
       
       ;; Transfer USDCx to seller
-      (try! (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx transfer 
+      (try! (as-contract (contract-call? USDCX-CONTRACT transfer 
              net-usdc-return 
              tx-sender 
              seller 
              none)))
       
       ;; Transfer fees
-      (try! (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx transfer 
+      (try! (as-contract (contract-call? USDCX-CONTRACT transfer 
              platform-fee-amount 
              tx-sender 
              (var-get platform-treasury) 
              none)))
-      (try! (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx transfer 
+      (try! (as-contract (contract-call? USDCX-CONTRACT transfer 
              creator-fee-amount 
              tx-sender 
              (get creator pool) 

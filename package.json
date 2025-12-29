@@ -11,7 +11,10 @@
     },
     "devDependencies": {
         "@stacks/clarinet-sdk": "^3.1.1",
-        "@stacks/transactions": "^7.0.0",
+        "@stacks/transactions": "^7.3.1",
         "vitest": "^2.0.0"
+    },
+    "dependencies": {
+        "@stacks/connect": "^8.2.4"
     }
 }
