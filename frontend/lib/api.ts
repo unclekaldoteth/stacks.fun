@@ -157,6 +157,31 @@ export async function checkHealth() {
     }
 }
 
+// Platform stats interface
+export interface PlatformStats {
+    tokens_launched: number;
+    daily_volume: number;
+    graduated: number;
+    active_traders: number;
+}
+
+// Get platform stats
+export async function getStats(): Promise<PlatformStats> {
+    try {
+        const response = await fetch(`${API_URL}/api/stats`);
+        if (!response.ok) throw new Error('Failed to fetch stats');
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching stats:', error);
+        return {
+            tokens_launched: 0,
+            daily_volume: 0,
+            graduated: 0,
+            active_traders: 0
+        };
+    }
+}
+
 // Get all tokens
 export async function getTokens(options?: {
     orderBy?: string;

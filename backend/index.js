@@ -77,6 +77,60 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// Get platform stats (tokens launched, volume, graduated, traders)
+app.get('/api/stats', async (req, res) => {
+    try {
+        const isMainnet = process.env.STACKS_NETWORK === 'mainnet';
+        const addressFilter = isMainnet ? 'SP%' : 'ST%';
+
+        if (supabase) {
+            // Get total tokens count
+            let tokensQuery = supabase.from('tokens').select('id', { count: 'exact', head: true });
+            if (isMainnet) tokensQuery = tokensQuery.like('creator', addressFilter);
+            const { count: totalTokens } = await tokensQuery;
+
+            // Get graduated tokens count
+            let graduatedQuery = supabase.from('tokens').select('id', { count: 'exact', head: true }).eq('is_graduated', true);
+            if (isMainnet) graduatedQuery = graduatedQuery.like('creator', addressFilter);
+            const { count: graduatedTokens } = await graduatedQuery;
+
+            // Get 24h volume (sum of trades in last 24 hours)
+            const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+            let volumeQuery = supabase.from('trades').select('stx_amount').gte('created_at', yesterday);
+            const { data: trades } = await volumeQuery;
+            const dailyVolume = trades?.reduce((sum, t) => sum + parseFloat(t.stx_amount || 0), 0) || 0;
+
+            // Get active traders (unique traders in last 24 hours)
+            let tradersQuery = supabase.from('trades').select('trader').gte('created_at', yesterday);
+            const { data: traderData } = await tradersQuery;
+            const uniqueTraders = new Set(traderData?.map(t => t.trader) || []);
+            const activeTraders = uniqueTraders.size;
+
+            res.json({
+                tokens_launched: totalTokens || 0,
+                daily_volume: Math.round(dailyVolume),
+                graduated: graduatedTokens || 0,
+                active_traders: activeTraders
+            });
+        } else {
+            res.json({
+                tokens_launched: inMemoryState.tokens.length,
+                daily_volume: 0,
+                graduated: 0,
+                active_traders: 0
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching stats:', error);
+        res.json({
+            tokens_launched: 0,
+            daily_volume: 0,
+            graduated: 0,
+            active_traders: 0
+        });
+    }
+});
+
 // Get all tokens
 app.get('/api/tokens', async (req, res) => {
     try {

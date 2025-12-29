@@ -6,7 +6,7 @@ import TokenCard from '@/components/TokenCard';
 import KingOfTheHill from '@/components/KingOfTheHill';
 import RecentTrades from '@/components/RecentTrades';
 import AdvancedSearch from '@/components/AdvancedSearch';
-import { Token, getTokens, getTrendingTokens, Activity, getActivity } from '@/lib/api';
+import { Token, getTokens, getTrendingTokens, Activity, getActivity, PlatformStats, getStats } from '@/lib/api';
 import { formatAddress, getExplorerTxUrl } from '@/lib/stacks';
 
 type FilterTab = 'trending' | 'new' | 'graduated';
@@ -14,6 +14,12 @@ type FilterTab = 'trending' | 'new' | 'graduated';
 export default function Home() {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [activity, setActivity] = useState<Activity[]>([]);
+  const [stats, setStats] = useState<PlatformStats>({
+    tokens_launched: 0,
+    daily_volume: 0,
+    graduated: 0,
+    active_traders: 0
+  });
   const [activeTab, setActiveTab] = useState<FilterTab>('trending');
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -44,6 +50,10 @@ export default function Home() {
       // Fetch activity
       const activityData = await getActivity(5);
       setActivity(activityData);
+
+      // Fetch platform stats
+      const statsData = await getStats();
+      setStats(statsData);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -133,19 +143,21 @@ export default function Home() {
         <div className="stats-grid">
           <div className="stat-item">
             <span className="pump-label">tokens launched</span>
-            <div className="stat-val">{tokens.length}</div>
+            <div className="stat-val">{stats.tokens_launched}</div>
           </div>
           <div className="stat-item">
-            <span className="pump-label">daily volume</span>
-            <div className="stat-val text-[var(--accent-orange)]">$0</div>
+            <span className="pump-label">24h volume</span>
+            <div className="stat-val text-[var(--accent-orange)]">
+              ${stats.daily_volume >= 1000 ? `${(stats.daily_volume / 1000).toFixed(1)}K` : stats.daily_volume.toLocaleString()}
+            </div>
           </div>
           <div className="stat-item">
             <span className="pump-label">graduated</span>
-            <div className="stat-val text-[var(--accent-yellow)]">0</div>
+            <div className="stat-val text-[var(--accent-yellow)]">{stats.graduated}</div>
           </div>
           <div className="stat-item">
-            <span className="pump-label">active traders</span>
-            <div className="stat-val">0</div>
+            <span className="pump-label">24h traders</span>
+            <div className="stat-val">{stats.active_traders}</div>
           </div>
         </div>
 
