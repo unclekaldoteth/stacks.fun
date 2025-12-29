@@ -50,7 +50,7 @@ export default function KingOfTheHill({ token }: KingOfTheHillProps) {
                             <div>
                                 <span className="pump-label">Market Cap</span>
                                 <div className="text-2xl font-black text-[var(--accent-orange)] terminal-text">
-                                    {token.market_cap.toLocaleString()} STX
+                                    ${token.market_cap.toLocaleString()}
                                 </div>
                             </div>
                             <div>
@@ -62,7 +62,7 @@ export default function KingOfTheHill({ token }: KingOfTheHillProps) {
                             <div className="hidden md:block">
                                 <span className="pump-label">Price</span>
                                 <div className="text-2xl font-black text-white terminal-text">
-                                    {token.current_price.toFixed(6)} STX
+                                    ${token.current_price.toFixed(6)}
                                 </div>
                             </div>
                         </div>
@@ -75,7 +75,7 @@ export default function KingOfTheHill({ token }: KingOfTheHillProps) {
                             />
                         </div>
                         <p className="mt-2 text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest text-center md:text-left">
-                            ALEX Graduation Threshold: 69,000 STX Market Cap
+                            ALEX Graduation Threshold: $69,000 Market Cap
                         </p>
                     </div>
                 </div>

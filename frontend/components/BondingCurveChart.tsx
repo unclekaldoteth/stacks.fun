@@ -36,9 +36,9 @@ export default function BondingCurveChart({
     const graduationThreshold = 69000;
 
     const formatPrice = (value: number) => {
-        if (value >= 1) return `${value.toFixed(2)} STX`;
-        if (value >= 0.01) return `${value.toFixed(4)} STX`;
-        return `${value.toFixed(6)} STX`;
+        if (value >= 1) return `$${value.toFixed(2)}`;
+        if (value >= 0.01) return `$${value.toFixed(4)}`;
+        return `$${value.toFixed(6)}`;
     };
 
     const formatTokens = (value: number) => {
@@ -61,7 +61,7 @@ export default function BondingCurveChart({
                 <div className="text-right">
                     <h3 className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)] mb-1">current price</h3>
                     <div className="text-2xl font-black text-[var(--accent-orange)] terminal-text">
-                        {currentPrice.toFixed(6)} <span className="text-xs">STX</span>
+                        ${currentPrice.toFixed(6)}
                     </div>
                 </div>
             </div>
@@ -144,13 +144,13 @@ export default function BondingCurveChart({
                 <div>
                     <span className="pump-label">market cap</span>
                     <div className="text-lg font-black text-[var(--accent-orange)] terminal-text">
-                        {marketCap.toLocaleString()} <span className="text-[10px]">STX</span>
+                        ${marketCap.toLocaleString()}
                     </div>
                 </div>
                 <div>
                     <span className="pump-label">reserve</span>
                     <div className="text-lg font-black text-white terminal-text">
-                        {(marketCap * 0.8).toLocaleString()} <span className="text-[10px]">STX</span>
+                        ${(marketCap * 0.8).toLocaleString()}
                     </div>
                 </div>
             </div>
@@ -159,7 +159,7 @@ export default function BondingCurveChart({
             <div className="mt-8">
                 <div className="flex justify-between items-center mb-2">
                     <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">graduation progress</span>
-                    <span className="text-[10px] font-black text-white terminal-text">69,000 STX TOTAL</span>
+                    <span className="text-[10px] font-black text-white terminal-text">$69,000 TARGET</span>
                 </div>
                 <div className="h-2 bg-black border border-[var(--border)] rounded-full overflow-hidden">
                     <div
@@ -168,7 +168,7 @@ export default function BondingCurveChart({
                     />
                 </div>
                 <p className="mt-2 text-[10px] text-[var(--text-secondary)] italic leading-tight">
-                    when the market cap reaches 69k STX, all liquidity will be migrated to ALEX lab and the token will graduate.
+                    when the market cap reaches $69K, all liquidity will be migrated to ALEX lab and the token will graduate.
                 </p>
             </div>
         </div>

@@ -91,7 +91,7 @@ export default function TokenCard({ token, rank, showVolume = true }: TokenCardP
                                 <span className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-tighter">Market Cap</span>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs font-black text-[var(--accent-orange)] terminal-text">
-                                        {token.market_cap.toLocaleString()} STX
+                                        ${token.market_cap.toLocaleString()}
                                     </span>
                                     <span className={`text-[10px] font-bold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
                                         {isPositive ? '↑' : '↓'}{Math.abs(priceChange).toFixed(1)}%
@@ -103,7 +103,7 @@ export default function TokenCard({ token, rank, showVolume = true }: TokenCardP
                             <div className="flex justify-between items-baseline">
                                 <span className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-tighter">Price</span>
                                 <span className="text-[10px] font-bold text-white terminal-text">
-                                    {token.current_price.toFixed(6)} STX
+                                    ${token.current_price.toFixed(6)}
                                 </span>
                             </div>
 
@@ -112,7 +112,7 @@ export default function TokenCard({ token, rank, showVolume = true }: TokenCardP
                                 <div className="flex justify-between items-baseline">
                                     <span className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-tighter">24h Vol</span>
                                     <span className="text-[10px] font-bold text-[var(--accent-yellow)] terminal-text">
-                                        {volume.toLocaleString()} STX
+                                        ${volume.toLocaleString()}
                                     </span>
                                 </div>
                             )}

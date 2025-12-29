@@ -288,7 +288,7 @@ export default function TradePanel({
                         className="w-full bg-zinc-900 border-2 border-[var(--border)] rounded-lg px-4 py-4 text-2xl font-black terminal-text focus:outline-none focus:border-white transition-all"
                     />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] font-black text-sm">
-                        {mode === 'buy' ? 'STX' : token.symbol}
+                        {mode === 'buy' ? 'USDC' : token.symbol}
                     </div>
                 </div>
 
@@ -301,7 +301,7 @@ export default function TradePanel({
                                 onClick={() => setAmount(v)}
                                 className="flex-1 bg-zinc-900 hover:bg-zinc-800 text-[10px] py-2 rounded font-bold border border-[var(--border)]"
                             >
-                                {v} STX
+                                ${v}
                             </button>
                         ))
                     ) : (
@@ -323,11 +323,11 @@ export default function TradePanel({
                 <div className="mb-6 p-4 bg-zinc-900/50 rounded-lg border border-dashed border-[var(--border)] terminal-text text-[11px]">
                     <div className="flex justify-between items-center mb-1">
                         <span className="text-[var(--text-muted)]">receiving</span>
-                        <span className="text-white font-bold">{expectedOutput.toLocaleString()} {mode === 'buy' ? token.symbol : 'STX'}</span>
+                        <span className="text-white font-bold">{expectedOutput.toLocaleString()} {mode === 'buy' ? token.symbol : 'USDC'}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="text-[var(--text-muted)]">slippage (max)</span>
-                        <span className="text-white font-bold">{minOutput.toLocaleString()}</span>
+                        <span className="text-white font-bold">{minOutput.toLocaleString()} {mode === 'buy' ? token.symbol : 'USDC'}</span>
                     </div>
                 </div>
             )}

@@ -9,7 +9,7 @@ interface Trade {
     txId: string;
     type: 'buy' | 'sell';
     trader: string;
-    stxAmount: number;
+    usdcAmount: number;
     tokenAmount: number;
     tokenSymbol: string;
     timestamp: Date;
@@ -56,7 +56,7 @@ export default function RecentTrades({ limit = 10, showTitle = true }: RecentTra
                             txId: event.tx_id,
                             type: 'buy',
                             trader: extractAddress(repr) || 'Unknown',
-                            stxAmount: extractNumber(repr, 'stx') / 1_000_000,
+                            usdcAmount: extractNumber(repr, 'usdc') / 1_000_000,
                             tokenAmount: extractNumber(repr, 'tokens') / 100_000_000,
                             tokenSymbol: 'TKN',
                             timestamp: new Date(event.block_time_iso || Date.now())
@@ -69,7 +69,7 @@ export default function RecentTrades({ limit = 10, showTitle = true }: RecentTra
                             txId: event.tx_id,
                             type: 'sell',
                             trader: extractAddress(repr) || 'Unknown',
-                            stxAmount: extractNumber(repr, 'stx') / 1_000_000,
+                            usdcAmount: extractNumber(repr, 'usdc') / 1_000_000,
                             tokenAmount: extractNumber(repr, 'tokens') / 100_000_000,
                             tokenSymbol: 'TKN',
                             timestamp: new Date(event.block_time_iso || Date.now())
@@ -193,10 +193,10 @@ export default function RecentTrades({ limit = 10, showTitle = true }: RecentTra
                                 </div>
                             </div>
 
-                            {/* STX Amount & Time */}
+                            {/* USDC Amount & Time */}
                             <div className="text-right">
                                 <div className="text-xs font-bold text-[var(--accent-orange)] terminal-text">
-                                    {trade.stxAmount.toFixed(2)} STX
+                                    ${trade.usdcAmount.toFixed(2)}
                                 </div>
                                 <div className="text-[10px] text-[var(--text-muted)]">
                                     {getTimeAgo(trade.timestamp)}

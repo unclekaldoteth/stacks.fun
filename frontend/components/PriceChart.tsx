@@ -124,9 +124,9 @@ export default function PriceChart({ tokenSymbol, currentPrice, historicalData }
     };
 
     const formatPrice = (value: number) => {
-        if (value >= 1) return `${value.toFixed(4)} STX`;
-        if (value >= 0.0001) return `${value.toFixed(6)} STX`;
-        return `${value.toFixed(8)} STX`;
+        if (value >= 1) return `$${value.toFixed(4)}`;
+        if (value >= 0.0001) return `$${value.toFixed(6)}`;
+        return `$${value.toFixed(8)}`;
     };
 
     return (
@@ -239,7 +239,7 @@ export default function PriceChart({ tokenSymbol, currentPrice, historicalData }
                 <div>
                     <span className="pump-label">Volume</span>
                     <div className="text-xs font-bold text-[var(--accent-orange)] terminal-text">
-                        {chartData.reduce((acc, d) => acc + d.volume, 0).toLocaleString()} STX
+                        ${chartData.reduce((acc, d) => acc + d.volume, 0).toLocaleString()}
                     </div>
                 </div>
             </div>

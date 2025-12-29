@@ -46,19 +46,19 @@ export default function LeaderboardPage() {
                     <div className="pump-panel bg-zinc-900/20 border-[var(--accent-yellow)] text-center p-8 group hover:scale-105 transition-all">
                         <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">🥇</div>
                         <h3 className="text-[var(--accent-yellow)] uppercase tracking-[0.2em] text-xs mb-2">first position</h3>
-                        <div className="text-3xl text-white terminal-text">500 STX</div>
+                        <div className="text-3xl text-white terminal-text">$500</div>
                         <p className="text-[9px] text-[var(--text-muted)] mt-2 uppercase">+ ARCHON STATUS NFT</p>
                     </div>
                     <div className="pump-panel bg-zinc-900/20 border-zinc-500 text-center p-8 group hover:scale-105 transition-all">
                         <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">🥈</div>
                         <h3 className="text-zinc-400 uppercase tracking-[0.2em] text-xs mb-2">second position</h3>
-                        <div className="text-3xl text-white terminal-text">250 STX</div>
+                        <div className="text-3xl text-white terminal-text">$250</div>
                         <p className="text-[9px] text-[var(--text-muted)] mt-2 uppercase">+ ELITE STATUS NFT</p>
                     </div>
                     <div className="pump-panel bg-zinc-900/20 border-orange-700 text-center p-8 group hover:scale-105 transition-all">
                         <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">🥉</div>
                         <h3 className="text-orange-600 uppercase tracking-[0.2em] text-xs mb-2">third position</h3>
-                        <div className="text-3xl text-white terminal-text">100 STX</div>
+                        <div className="text-3xl text-white terminal-text">$100</div>
                         <p className="text-[9px] text-[var(--text-muted)] mt-2 uppercase">+ VETERAN STATUS NFT</p>
                     </div>
                 </div>
@@ -132,7 +132,7 @@ export default function LeaderboardPage() {
 
                                         <div className="col-span-4 text-left md:text-right pr-4">
                                             <span className="md:hidden text-[9px] font-black uppercase text-[var(--text-muted)] mr-2">volume:</span>
-                                            <span className="text-lg font-black text-[var(--accent-orange)] terminal-text">{entry.total_volume_stx.toLocaleString()} STX</span>
+                                            <span className="text-lg font-black text-[var(--accent-orange)] terminal-text">${entry.total_volume_stx.toLocaleString()}</span>
                                         </div>
                                     </div>
                                 );

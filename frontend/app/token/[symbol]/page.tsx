@@ -95,7 +95,7 @@ export default function TokenDetailPage() {
                                     </div>
                                     <div>|</div>
                                     <div className="flex items-center gap-1">
-                                        CAP: <span className="text-[var(--accent-orange)]">{token.market_cap.toLocaleString()} STX</span>
+                                        CAP: <span className="text-[var(--accent-orange)]">${token.market_cap.toLocaleString()}</span>
                                     </div>
                                 </div>
                                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed italic border-l-4 border-[var(--border)] pl-4 py-1 mb-4">
@@ -175,7 +175,7 @@ export default function TokenDetailPage() {
                                     <div className="grid grid-cols-5 text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider px-2 mb-2">
                                         <div className="col-span-1">account</div>
                                         <div className="col-span-1">type</div>
-                                        <div className="col-span-1 text-right">STX</div>
+                                        <div className="col-span-1 text-right">USDC</div>
                                         <div className="col-span-1 text-right">amount</div>
                                         <div className="col-span-1 text-right">time</div>
                                     </div>

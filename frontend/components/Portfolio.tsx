@@ -159,7 +159,7 @@ export default function Portfolio({ showHeader = true }: PortfolioProps) {
             <div className="mb-6 p-4 bg-gradient-to-r from-[var(--accent-orange)]/10 to-transparent rounded-lg border border-[var(--accent-orange)]/20">
                 <span className="pump-label">Total Value</span>
                 <div className="text-2xl font-black text-[var(--accent-orange)] terminal-text">
-                    {totalValue.toLocaleString(undefined, { maximumFractionDigits: 2 })} STX
+                    ${totalValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                 </div>
                 <div className="text-[10px] text-[var(--text-muted)] mt-1">
                     {holdings.length} token{holdings.length !== 1 ? 's' : ''} in wallet
@@ -205,7 +205,7 @@ export default function Portfolio({ showHeader = true }: PortfolioProps) {
                             {/* Value & Change */}
                             <div className="text-right">
                                 <div className="text-xs font-bold text-white terminal-text">
-                                    {token.valueStx.toFixed(2)} STX
+                                    ${token.valueStx.toFixed(2)}
                                 </div>
                                 <div className={`text-[10px] font-bold ${token.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                     {token.change24h >= 0 ? '↑' : '↓'}{Math.abs(token.change24h).toFixed(1)}%

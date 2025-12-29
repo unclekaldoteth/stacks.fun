@@ -137,7 +137,7 @@ export default function Home() {
           </div>
           <div className="stat-item">
             <span className="pump-label">daily volume</span>
-            <div className="stat-val text-[var(--accent-orange)]">124K STX</div>
+            <div className="stat-val text-[var(--accent-orange)]">$124K</div>
           </div>
           <div className="stat-item">
             <span className="pump-label">graduated</span>

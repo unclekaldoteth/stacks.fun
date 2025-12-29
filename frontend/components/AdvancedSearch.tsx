@@ -241,10 +241,10 @@ export default function AdvancedSearch({ onResultClick }: AdvancedSearchProps) {
                                 {/* Price & Market Cap */}
                                 <div className="text-right">
                                     <div className="text-xs font-bold text-[var(--accent-orange)] terminal-text">
-                                        {token.market_cap.toLocaleString()} STX
+                                        ${token.market_cap.toLocaleString()}
                                     </div>
                                     <div className="text-[10px] text-[var(--text-muted)]">
-                                        {token.current_price.toFixed(6)} STX
+                                        ${token.current_price.toFixed(6)}
                                     </div>
                                 </div>
                             </Link>
