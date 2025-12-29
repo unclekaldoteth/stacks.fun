@@ -77,6 +77,22 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// Root route (for Railway health checks)
+app.get('/', (req, res) => {
+    res.json({
+        status: 'ok',
+        service: 'stacks.fun backend',
+        version: '1.0.0',
+        endpoints: {
+            health: '/api/health',
+            stats: '/api/stats',
+            tokens: '/api/tokens',
+            activity: '/api/activity',
+            leaderboard: '/api/leaderboard'
+        }
+    });
+});
+
 // Get platform stats (tokens launched, volume, graduated, traders)
 app.get('/api/stats', async (req, res) => {
     try {
