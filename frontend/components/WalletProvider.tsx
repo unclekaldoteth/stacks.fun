@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
-import { WALLETCONNECT_PROJECT_ID, NETWORK, APP_NAME } from '@/config';
+import { WALLETCONNECT_PROJECT_ID, NETWORK } from '@/config';
 import { getSTXBalance } from '@/lib/hiro';
 
 interface WalletContextType {
@@ -40,13 +40,6 @@ function getAddressForNetwork(addresses: { address: string }[] | undefined, isMa
     return addresses[0]?.address || null;
 }
 
-// Get app details for wallet connection
-function getAppDetails() {
-    return {
-        name: APP_NAME,
-        icon: typeof window !== 'undefined' ? `${window.location.origin}/favicon.ico` : '/favicon.ico',
-    };
-}
 
 export function WalletProvider({ children }: { children: ReactNode }) {
     const [isConnected, setIsConnected] = useState(false);
@@ -114,23 +107,20 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         try {
             const { connect, getLocalStorage } = await import('@stacks/connect');
 
-            // Build connection options
-            const connectionOptions: Parameters<typeof connect>[0] = {
-                network: isMainnet ? 'mainnet' : 'testnet',
-                appDetails: getAppDetails(),
-            };
-
-            // Only include WalletConnect project ID if it's configured
-            if (WALLETCONNECT_PROJECT_ID && WALLETCONNECT_PROJECT_ID !== 'your_walletconnect_project_id_here') {
-                connectionOptions.walletConnectProjectId = WALLETCONNECT_PROJECT_ID;
-            }
+            // Build connection options for @stacks/connect v8
+            // Note: appDetails is set via openContractCall, not connect()
+            const hasWalletConnect = WALLETCONNECT_PROJECT_ID && 
+                WALLETCONNECT_PROJECT_ID !== 'your_walletconnect_project_id_here';
 
             console.log('Connection options:', { 
-                network: connectionOptions.network, 
-                hasWalletConnect: !!connectionOptions.walletConnectProjectId 
+                network: isMainnet ? 'mainnet' : 'testnet', 
+                hasWalletConnect 
             });
 
-            await connect(connectionOptions);
+            await connect({
+                network: isMainnet ? 'mainnet' : 'testnet',
+                ...(hasWalletConnect && { walletConnectProjectId: WALLETCONNECT_PROJECT_ID }),
+            });
 
             // Small delay to ensure wallet data is stored
             await new Promise(resolve => setTimeout(resolve, 100));
